@@ -1,5 +1,5 @@
 /**
- * $Id: Sidebar-IBMShape.js,v 1.0 2022/02/28 17:00:00 mate Exp $
+ * $Id: Sidebar-IBMShape.js,v 1.0 2022/04/30 17:00:00 mate Exp $
  * Copyright (c) 2022, JGraph Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
