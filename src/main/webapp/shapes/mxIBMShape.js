@@ -265,13 +265,13 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 	//let barVisible = (shapeType === 'pg' || shapeType === 'lg');
 	let barVisible = shapeType.startsWith('group');
-	let barWidth = sizes.barWidth;
-	let barHeight = sizes.barHeight;
+	let sidebarWidth = sizes.sidebarWidth;
+	let sidebarHeight = sizes.sidebarHeight;
 
 	//let tickVisible = (shapeType === 'lc' || shapeType === 'pc');
 	let tickVisible = shapeType.startsWith('comp');
-	let tickWidth = sizes.tickWidth;
-	let tickHeight = sizes.tickHeight;
+	let sidetickWidth = sizes.sidetickWidth;
+	let sidetickHeight = sizes.sidetickHeight;
 	let tickOffset = sizes.tickOffset;
 
 	let badge = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
@@ -360,13 +360,13 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 		'barVisible': barVisible,
 		//'barColor': barColor,
-		'barWidth': barWidth,
-		'barHeight': barHeight,
+		'sidebarWidth': sidebarWidth,
+		'sidebarHeight': sidebarHeight,
 
 		'tickVisible': tickVisible,
 		//'tickColor': tickColor,
-		'tickWidth': tickWidth,
-		'tickHeight': tickHeight,
+		'sidetickWidth': sidetickWidth,
+		'sidetickHeight': sidetickHeight,
 		'tickOffset': tickOffset,
 
 		'badge': badge,
@@ -758,7 +758,7 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 				c.moveTo(pop.curveRadius, 0);
 				c.lineTo(pop.cornerWidth, 0);
 				c.lineTo(pop.cornerWidth, pop.cornerHeight);
-				if (pop.barHeight < pop.shapeHeight)
+				if (pop.sidebarHeight < pop.shapeHeight)
 				{
 					c.lineTo(0, pop.cornerHeight);
 				}
@@ -788,7 +788,7 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 	//if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 	if (pop.shapeType.slice(-1) === 'l')
 	{
-		if (pop.barHeight < pop.shapeHeight)
+		if (pop.sidebarHeight < pop.shapeHeight)
 		{
 			c.begin();
 			c.moveTo(pop.curveRadius, 0);
@@ -962,7 +962,7 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 			let angle = 135;
 
 			if (pop.shapeType.startsWith('group')) {
-				leftCornerX = pop.barWidth;
+				leftCornerX = pop.sidebarWidth;
 				rightCornerY = pop.shapeHeight;
 			}
 			else if (pop.shapeLayout.startsWith('expanded') && pop.cornerVisible) {
@@ -984,7 +984,7 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 			}
 		}
 		else if (pop.shapeType === 'groupp') {
-			leftCornerX = pop.barWidth;
+			leftCornerX = pop.sidebarWidth;
 			rightCornerY = pop.shapeHeight;
 		}
 
@@ -1003,9 +1003,9 @@ mxIBMShapeBase.prototype.paintShapeDecoration = function(c)
 		c.save();
 		c.setDashed(false);
 		c.setFillColor(ibmConfig.ibmColors.white);
-		c.rect(pop.tickOffset, Math.floor(pop.cornerHeight / 4), pop.tickWidth, pop.tickHeight);
+		c.rect(pop.tickOffset, Math.floor(pop.cornerHeight / 4), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
-		c.rect(pop.tickOffset, Math.floor((pop.cornerHeight / 3) * 2), pop.tickWidth, pop.tickHeight);
+		c.rect(pop.tickOffset, Math.floor((pop.cornerHeight / 3) * 2), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
 		c.restore();
 	}
@@ -1013,7 +1013,7 @@ mxIBMShapeBase.prototype.paintShapeDecoration = function(c)
 	// Bar decorator
 	if (pop.barVisible) {
 		c.setFillColor(pop.lineColor);
-		c.rect(0, 0, pop.barWidth, pop.barHeight);
+		c.rect(0, 0, pop.sidebarWidth, pop.sidebarHeight);
 		c.fillAndStroke();
 	}
 }
