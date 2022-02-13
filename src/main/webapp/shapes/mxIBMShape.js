@@ -158,46 +158,63 @@ mxIBMShapeBase.prototype.getColors = function(shape)
 		'iconColor': iconColor};
 }
 
-// Retrieve sizes.
-mxIBMShapeBase.prototype.getSizes = function(shapeType, shapeLayout, shapeHeight, shapeWidth)
+// Retrieve size and color details.
+mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeHeight, shapeWidth)
 {
-	let sizes = ibmConfig.ibmShapeSizes;
-	let size = {};
+	let details = {};
 
 	if (shapeLayout === 'collapsed') {
 		if (shapeType === 'target') 
-			size = sizes.collapsedTarget;
+			details = ibmConfig.ibmShapeSizes.collapsedTarget;
 		else if (shapeType === 'actor') 
-			size = sizes.collapsedActor;
+			details = ibmConfig.ibmShapeSizes.collapsedActor;
 		else
-			size = sizes.collapsed;
+			details = ibmConfig.ibmShapeSizes.collapsed;
 
-		size.shapeHeight = Math.round(shapeHeight);
-		size.shapeWidth = Math.round(shapeWidth);
+		details['shapeHeight'] = shapeHeight;
+		details['shapeWidth'] = shapeWidth;
 	}
 	else if (shapeLayout.startsWith('expanded')) {
 		if (shapeType === 'target') 
-			size = sizes.expandedTarget;
+			details = ibmConfig.ibmShapeSizes.expandedTarget;
 		else if (shapeType.startsWith('group')) 
-			size = sizes.group;
+			details = ibmConfig.ibmShapeSizes.group;
 		else
-			size = sizes.expanded;
+			details = ibmConfig.ibmShapeSizes.expanded;
 
-		size.shapeHeight = Math.round(shapeHeight);
-		size.shapeWidth = Math.round(shapeWidth);
+		details['shapeHeight'] = shapeHeight;
+		details['shapeWidth'] = shapeWidth;
 	}
 	else if (shapeLayout.startsWith('item')) {
 		if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
-			size = sizes.itemStyleColorBadge;
-		else if (shapeType === 'target') 
-			size = sizes.itemTarget;
-		else if (shapeType === 'actor') 
-			size = sizes.itemActor;
-		else
-			size = sizes.itemShapeIcon;
+			details = ibmConfig.ibmShapeSizes.itemStyleColorBadge;
+		else if (shapeLayout === 'itemIcon' && shapeType === 'target') 
+			details = ibmConfig.ibmShapeSizes.itemTarget;
+		else if (shapeLayout === 'itemIcon' && shapeType === 'actor') 
+			details = ibmConfig.ibmShapeSizes.itemActor;
+		else if (shapeLayout === 'itemShape' || shapeLayout === 'itemIcon')
+			details = ibmConfig.ibmShapeSizes.itemShapeIcon;
+
+		details['shapeHeight'] = details.defaultHeight;
+		details['shapeWidth'] = details.defaultWidth;
+	}
+	else
+		details = ibmConfig.ibmShapeSizes.empty;
+
+	if (shape) {
+		let colors = this.getColors(shape);
+
+		details['lineColor'] = colors.lineColor;
+		details['fillColor'] = colors.fillColor;
+		details['fontColor'] = colors.fontColor;
+		details['badgeColor'] = colors.badgeColor;
+		details['badgeFontColor'] = colors.badgeFontColor;
+		details['iconColor'] = colors.iconColor;
+		details['iconAreaColor']  = colors.lineColor;
+		details['styleColor']  = colors.lineColor;
 	}
 
-	return size;
+	return details;
 }
 
 mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
@@ -234,17 +251,19 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		styleMultiplicity = false;
 	}
 
-	let colors = this.getColors(shape);
+	let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, height, width);
+	//let colors = this.getColors(shape);
 
-	let lineColor = colors.lineColor;
-	let fillColor = colors.fillColor;
-	let fontColor = colors.fontColor;
-	let badgeColor = colors.badgeColor;
-	let badgeFontColor = colors.badgeFontColor;
-	let iconColor = colors.iconColor;
+	let lineColor = details.lineColor;
+	let fillColor = details.fillColor;
+	let fontColor = details.fontColor;
+	let badgeColor = details.badgeColor;
+	let badgeFontColor = details.badgeFontColor;
+	let iconColor = details.iconColor;
 
-	let cornerColor = shapeType.startsWith('group') ? 'none' : lineColor;
-	let styleColor = lineColor;
+	let cornerColor = shapeType.startsWith('group') ? 'none' : details.iconAreaColor;
+	let styleColor = details.lineColor;
+
 	let secondLine = styleDouble;
 
 	//let cornerVisible = shapeVisible && (!hideIcon || cornerColor != 'none');
@@ -257,22 +276,21 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 			cornerVisible = false;
 	}
 
-	let sizes = mxIBMShapeBase.prototype.getSizes(shapeType, shapeLayout, height, width);
-	//let detailsSave = mxIBMShapeBase.prototype.getSizesSave(shapeType, shapeLayout, shapeSubLayout, width, height);
+	//let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, height, width);
 
-	let cornerWidth = (cornerVisible) ? sizes.cornerWidth : 0;
-	let cornerHeight = sizes.minHeight;
+	let cornerWidth = (cornerVisible) ? details.cornerWidth : 0;
+	let cornerHeight = details.minHeight;
 
 	//let barVisible = (shapeType === 'pg' || shapeType === 'lg');
 	let barVisible = shapeType.startsWith('group');
-	let sidebarWidth = sizes.sidebarWidth;
-	let sidebarHeight = sizes.sidebarHeight;
+	let sidebarWidth = details.sidebarWidth;
+	let sidebarHeight = details.sidebarHeight;
 
 	//let tickVisible = (shapeType === 'lc' || shapeType === 'pc');
 	let tickVisible = shapeType.startsWith('comp');
-	let sidetickWidth = sizes.sidetickWidth;
-	let sidetickHeight = sizes.sidetickHeight;
-	let sidetickAlign = sizes.sidetickAlign;
+	let sidetickWidth = details.sidetickWidth;
+	let sidetickHeight = details.sidetickHeight;
+	let sidetickAlign = details.sidetickAlign;
 
 	let badge = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
 	//let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout === 'expanded' || (shapeLayout === 'item' && shapeSubLayout === 'Badge'));
@@ -326,7 +344,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 	if (shapeLayout === 'collapsed' || shapeLayout.startsWith('item'))
 	{
-		labelOffset = sizes.labelOffset;
+		labelOffset = details.labelOffset;
 	}
 	else if (shapeLayout.startsWith('expanded'))
 	{
@@ -338,7 +356,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		}
 	}
 
-	let labelHeight = sizes.labelHeight;
+	let labelHeight = details.labelHeight;
 
 	return {
 		'shapeType': shapeType,
@@ -387,14 +405,14 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'cornerWidth': cornerWidth,
 		'cornerHeight': cornerHeight,
 
-		'shapeWidth': sizes.shapeWidth,
-		'shapeHeight': sizes.shapeHeight,
-		'curveRadius': sizes.curveRadius,
-		'shapeLeftOffset': sizes.shapeLeftOffset,
-		'doubleAlign': sizes.doubleAlign,
-		'multiplicitySpacing': sizes.multiplicitySpacing,
-		'iconSize': sizes.iconSize,
-		'iconSpacing': sizes.iconSpacing
+		'shapeWidth': details.shapeWidth,
+		'shapeHeight': details.shapeHeight,
+		'curveRadius': details.curveRadius,
+		'shapeLeftOffset': details.shapeLeftOffset,
+		'doubleAlign': details.doubleAlign,
+		'multiplicitySpacing': details.multiplicitySpacing,
+		'iconSize': details.iconSize,
+		'iconSpacing': details.iconSpacing
 	};
 };
 
@@ -1304,7 +1322,11 @@ mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, 
 {
 	if (shapeType != null)
 	{
-		let details = this.getSizes(shapeType, shapeLayout, rect.height, rect.width);
+		console.log("this:");
+		console.log(this);
+	//	console.log(this.state.style.shapeLayout);
+
+		let details = this.getDetails(null, shapeType, shapeLayout, rect.height, rect.width);
 		rect.width = Math.max(details.minWidth, rect.width);
 		let height = details.minHeight;
 
