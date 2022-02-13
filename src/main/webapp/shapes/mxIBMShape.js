@@ -389,7 +389,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 		'shapeWidth': sizes.shapeWidth,
 		'shapeHeight': sizes.shapeHeight,
-		'shapeRadius': sizes.shapeRadius,
+		'curveRadius': sizes.curveRadius,
 		'shapeLeftOffset': sizes.shapeLeftOffset,
 		'doubleOffset': sizes.doubleOffset,
 		'multiplicitySpacing': sizes.multiplicitySpacing,
@@ -743,19 +743,19 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 		//else if (pop.shapeType === 'ts')
 		else if (pop.shapeType === 'target')
 		{
-			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.shapeRadius, doubleStyleOffset, pop.shapeLeftOffset);
+			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.curveRadius, doubleStyleOffset, pop.shapeLeftOffset);
 		}
 		//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 		else if (pop.shapeType === 'nodel' || pop.shapeType === 'compl')
 		{
 			if (pop.shapeLayout === 'collapsed' || pop.shapeLayout.startsWith('item'))
 			{
-				mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.shapeRadius, doubleStyleOffset);
+				mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
 			}
 			else
 			{
 				c.begin();
-				c.moveTo(pop.shapeRadius, 0);
+				c.moveTo(pop.curveRadius, 0);
 				c.lineTo(pop.cornerWidth, 0);
 				c.lineTo(pop.cornerWidth, pop.cornerHeight);
 				if (pop.barHeight < pop.shapeHeight)
@@ -764,11 +764,11 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 				}
 				else
 				{
-					c.lineTo(pop.shapeRadius, pop.cornerHeight);
-					c.arcTo(pop.shapeRadius, pop.shapeRadius, 0, 0, 1, 0, pop.cornerHeight - pop.shapeRadius);
+					c.lineTo(pop.curveRadius, pop.cornerHeight);
+					c.arcTo(pop.curveRadius, pop.curveRadius, 0, 0, 1, 0, pop.cornerHeight - pop.curveRadius);
 				}
-				c.lineTo(0, pop.shapeRadius);	
-				c.arcTo(pop.shapeRadius, pop.shapeRadius, 0, 0, 1, pop.shapeRadius, 0);
+				c.lineTo(0, pop.curveRadius);	
+				c.arcTo(pop.curveRadius, pop.curveRadius, 0, 0, 1, pop.curveRadius, 0);
 				c.close();
 			}
 		}
@@ -791,20 +791,20 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 		if (pop.barHeight < pop.shapeHeight)
 		{
 			c.begin();
-			c.moveTo(pop.shapeRadius, 0);
-			c.lineTo(pop.shapeWidth - pop.shapeRadius, 0);
-			c.arcTo(pop.shapeRadius, pop.shapeRadius, 0, 0, 1, pop.shapeWidth, pop.shapeRadius);
+			c.moveTo(pop.curveRadius, 0);
+			c.lineTo(pop.shapeWidth - pop.curveRadius, 0);
+			c.arcTo(pop.curveRadius, pop.curveRadius, 0, 0, 1, pop.shapeWidth, pop.curveRadius);
 			c.lineTo(pop.shapeWidth, pop.labelHeight);
 			c.lineTo(0, pop.labelHeight);
-			c.lineTo(0, pop.shapeRadius);
-			c.arcTo(pop.shapeRadius, pop.shapeRadius, 0, 0, 1, pop.shapeRadius, 0);
+			c.lineTo(0, pop.curveRadius);
+			c.arcTo(pop.curveRadius, pop.curveRadius, 0, 0, 1, pop.curveRadius, 0);
 			c.close();
 			c.fill();
 		}
 		else
 		{
 			// c.setFillColor(color);
-			c.roundrect(0, 0, pop.shapeWidth, pop.labelHeight, pop.shapeRadius, pop.shapeRadius);
+			c.roundrect(0, 0, pop.shapeWidth, pop.labelHeight, pop.curveRadius, pop.curveRadius);
 			c.fill();
 		}
 	}
@@ -813,8 +813,8 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 	{
 		c.begin();
 		c.moveTo(0, 0);
-		c.lineTo(pop.shapeWidth - pop.shapeRadius, 0);
-		c.arcTo(pop.shapeRadius, pop.shapeRadius, 0, 0, 1, pop.shapeWidth, pop.shapeRadius);
+		c.lineTo(pop.shapeWidth - pop.curveRadius, 0);
+		c.arcTo(pop.curveRadius, pop.curveRadius, 0, 0, 1, pop.shapeWidth, pop.curveRadius);
 		c.lineTo(pop.shapeWidth, pop.labelHeight);
 		c.lineTo(0, pop.labelHeight);
 		c.lineTo(0, 0);
@@ -893,13 +893,13 @@ mxIBMShapeBase.prototype.paintShapeOutline = function(c, doubleStyleOffset)
 		mxIBMShapeBase.prototype.paintActor(c, pop.shapeWidth, doubleStyleOffset);
 	//else if (pop.shapeType === 'ts')
 	else if (pop.shapeType === 'target')
-		mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.shapeHeight, pop.shapeRadius, doubleStyleOffset, pop.shapeLeftOffset);
+		mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset, pop.shapeLeftOffset);
 	//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 	else if (pop.shapeType.slice(-1)  === 'l')
-		mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.shapeRadius, doubleStyleOffset);
+		mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
 	//else if (pop.shapeType === 'lg')
 	else if (pop.shapeType === 'groupl')
-		mxIBMShapeBase.prototype.paintLogicalGroup(c, pop.shapeWidth, pop.shapeHeight, pop.shapeRadius, doubleStyleOffset);
+		mxIBMShapeBase.prototype.paintLogicalGroup(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
 	else
 		mxIBMShapeBase.prototype.paintRectangle(c, pop.shapeWidth, pop.shapeHeight, doubleStyleOffset);
 }
@@ -926,7 +926,7 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 		c.begin();
 
 		if (pop.shapeType === 'actor') {
-			let r = pop.shapeRadius;
+			let r = pop.curveRadius;
 			let angle = 135;
 
 			leftCornerX = getCornerX(angle, r);
@@ -939,7 +939,7 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 		//else if (pop.shapeType === 'ts') {
 		else if (pop.shapeType === 'target') {
 			if (pop.shapeLayout === 'collapsed' || pop.shapeLayout.startsWith('item')) {
-				let r = pop.shapeRadius;
+				let r = pop.curveRadius;
 				let angle = 125;
 
 				leftCornerX = pop.shapeLeftOffset + getCornerX(angle, r);
@@ -951,14 +951,14 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 				rightCornerY = getCornerY(angle, r);
 			}
 			else {
-				leftCornerX = pop.shapeRadius;
-				rightCornerX = rightCornerX - pop.shapeRadius;
+				leftCornerX = pop.curveRadius;
+				rightCornerX = rightCornerX - pop.curveRadius;
 			}
 
 		}
 		//else if (-1 !== ['ln', 'lc', 'lg'].indexOf(pop.shapeType)) {
 		else if (pop.shapeType.slice(-1) === 'l') {
-			let r = pop.shapeRadius;
+			let r = pop.curveRadius;
 			let angle = 135;
 
 			if (pop.shapeType.startsWith('group')) {
@@ -1116,7 +1116,7 @@ mxIBMShapeBase.prototype.paintShapeMultiplicity = function(c) {
 	let pop = this.shapeProperties;
 
 	if (pop.styleMultiplicity) {
-		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicitySpacing, radius: pop.shapeRadius, offset: pop.shapeLeftOffset };
+		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicitySpacing, radius: pop.curveRadius, offset: pop.shapeLeftOffset };
 		let numbers = [1, 2];
 
 		c.begin();
@@ -1156,8 +1156,8 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 	{
 		//let positionX = (pop.shapeType === 'lg' || pop.shapeType  === 'pg') ? pop.cornerWidth - pop.iconSize : pop.cornerWidth/2 - pop.iconSize/2;
 		let positionX = pop.shapeType.startsWith('group') ? pop.cornerWidth - pop.iconSize : pop.cornerWidth/2 - pop.iconSize/2;
-		//positionX = (pop.shapeLayout === 'expanded' && pop.shapeType  === 'ts') ? positionX + pop.shapeRadius/2 : positionX;
-		positionX = (pop.shapeLayout.startsWith('expanded') && pop.shapeType  === 'target') ? positionX + pop.shapeRadius/2 : positionX;
+		//positionX = (pop.shapeLayout === 'expanded' && pop.shapeType  === 'ts') ? positionX + pop.curveRadius/2 : positionX;
+		positionX = (pop.shapeLayout.startsWith('expanded') && pop.shapeType  === 'target') ? positionX + pop.curveRadius/2 : positionX;
 		positionX = (pop.shapeLayout.startsWith('item')) ? 0 : positionX;
 		
 		let positionY = pop.cornerHeight/2 - pop.iconSize/2;
