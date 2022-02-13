@@ -272,7 +272,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let tickVisible = shapeType.startsWith('comp');
 	let sidetickWidth = sizes.sidetickWidth;
 	let sidetickHeight = sizes.sidetickHeight;
-	let tickOffset = sizes.tickOffset;
+	let sidetickAlign = sizes.sidetickAlign;
 
 	let badge = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
 	//let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout === 'expanded' || (shapeLayout === 'item' && shapeSubLayout === 'Badge'));
@@ -367,7 +367,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		//'tickColor': tickColor,
 		'sidetickWidth': sidetickWidth,
 		'sidetickHeight': sidetickHeight,
-		'tickOffset': tickOffset,
+		'sidetickAlign': sidetickAlign,
 
 		'badge': badge,
 		'badgeVisible': badgeVisible,
@@ -391,7 +391,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'shapeHeight': sizes.shapeHeight,
 		'curveRadius': sizes.curveRadius,
 		'shapeLeftOffset': sizes.shapeLeftOffset,
-		'doubleOffset': sizes.doubleOffset,
+		'doubleAlign': sizes.doubleAlign,
 		'multiplicitySpacing': sizes.multiplicitySpacing,
 		'iconSize': sizes.iconSize,
 		'iconSpacing': sizes.iconSpacing
@@ -733,7 +733,7 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 
 	if (pop.cornerVisible)
 	{
-		const doubleStyleOffset = (pop.secondLine) ? pop.doubleOffset : 0;
+		const doubleStyleOffset = (pop.secondLine) ? pop.doubleAlign : 0;
 		c.setFillColor(pop.cornerColor);
 
 		if (pop.shapeType === 'actor')
@@ -851,7 +851,7 @@ mxIBMShapeBase.prototype.paintShapeStyle = function(c)
 	let pop = this.shapeProperties;
 
 	if (pop.secondLine) {
-		const doubleStyleOffset = pop.doubleOffset;
+		const doubleStyleOffset = pop.doubleAlign;
 
 		c.save();
 		c.setDashed(false, false);
@@ -1003,9 +1003,9 @@ mxIBMShapeBase.prototype.paintShapeDecoration = function(c)
 		c.save();
 		c.setDashed(false);
 		c.setFillColor(ibmConfig.ibmColors.white);
-		c.rect(pop.tickOffset, Math.floor(pop.cornerHeight / 4), pop.sidetickWidth, pop.sidetickHeight);
+		c.rect(pop.sidetickAlign, Math.floor(pop.cornerHeight / 4), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
-		c.rect(pop.tickOffset, Math.floor((pop.cornerHeight / 3) * 2), pop.sidetickWidth, pop.sidetickHeight);
+		c.rect(pop.sidetickAlign, Math.floor((pop.cornerHeight / 3) * 2), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
 		c.restore();
 	}
