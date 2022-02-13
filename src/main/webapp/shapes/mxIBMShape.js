@@ -155,7 +155,7 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 }
 
 // Retrieve color settings.
-mxIBMShapeBase.prototype.getColors = function(shape)
+mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 {
 	// Retrieve color settings.
 	let lineColor = mxUtils.getValue(shape.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
@@ -165,7 +165,7 @@ mxIBMShapeBase.prototype.getColors = function(shape)
 
 	let badgeFontColor = fontColor;
 	let iconColor = fontColor;
-	let iconAreaColor = lineColor;
+	let iconAreaColor = (shapeType.startsWith('group')) ? 'none' : lineColor;
 	let styleColor = lineColor;
 
 	// Set line color to black if not set otherwise use line color.
@@ -174,11 +174,32 @@ mxIBMShapeBase.prototype.getColors = function(shape)
 	// Set fill color to transparent if not set otherwise use fill color.
 	fillColor = (fillColor === this.cst.FILL_COLOR_DEFAULT) ? ibmConfig.ibmColors.none : this.rgb2hex(fillColor);
 
+	// Set fill color to same as line color for legend color items.
+	fillColor = (shapeLayout === 'itemColor') ? lineColor : fillColor;
+
 	// Set font and icon colors to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
+	// Normalize font color to be visible for target shape type.
+	fontColor = (shapeType === 'target') ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
+
 	// Set badge color to line color if not set otherwise use badge color.
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
+
+	// Normalize badge font color to be visible if badge color is too dark.
+	badgeFontColor = this.normalizeFontColor(badgeFontColor, badgeColor);
+
+	// Normalize icon color to be visible if icon area color is too dark.
+	iconColor = this.normalizeFontColor(ibmConfig.ibmColors.black, iconAreaColor);
+
+	// Set icon color to black for legend icon items.
+	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.black : iconColor;
+
+	// Normalize style color to be visibile if icon area color is too dark.
+	styleColor = this.normalizeFontColor(styleColor, iconAreaColor);
+
+	// Set icon color to black for legend style items.
+	styleColor = (shapeLayout === 'itemStyle') ? ibmConfig.ibmColors.black : styleColor;
 
 	return {'lineColor': lineColor,
 		'fillColor': fillColor, 
@@ -234,7 +255,7 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 		details = ibmConfig.ibmShapeSizes.empty;
 
 	if (shape) {
-		let colors = this.getColors(shape);
+		let colors = this.getColors(shape, shapeType, shapeLayout);
 
 		details['lineColor'] = colors.lineColor;
 		details['fillColor'] = colors.fillColor;
@@ -293,8 +314,9 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let badgeFontColor = details.badgeFontColor;
 	let iconColor = details.iconColor;
 
-	let cornerColor = shapeType.startsWith('group') ? 'none' : details.iconAreaColor;
-	let styleColor = details.lineColor;
+	//let cornerColor = shapeType.startsWith('group') ? 'none' : details.iconAreaColor;
+	let cornerColor = details.iconAreaColor;
+	let styleColor = details.styleColor;
 
 	let secondLine = styleDouble;
 
@@ -329,27 +351,29 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout.startsWith('expanded') || shapeLayout === 'itemBadge');
 	let badgeText = badgeVisible ? shape.state.cell.getAttribute('Badge-Text', null) : null;
 
-	badgeFontColor = this.normalizeFontColor(ibmConfig.ibmColors.black, badgeColor);
+	//SAVE badgeFontColor = this.normalizeFontColor(ibmConfig.ibmColors.black, badgeColor);
 
-	iconColor = this.normalizeFontColor(ibmConfig.ibmColors.black, cornerColor);
+	//SAVE iconColor = this.normalizeFontColor(ibmConfig.ibmColors.black, cornerColor);
 
 	if (shapeLayout === 'itemColor' || shapeLayout === 'itemShape')
 	{
 		secondLine = false;
-		if (shapeLayout === 'itemColor')
-			fillColor = lineColor;  // Line fill color legend.
+		//SAVEif (shapeLayout === 'itemColor')
+		//SAVE	fillColor = lineColor;  // Line fill color legend.
 	}
 
 	if (shapeLayout === 'collapsed' || shapeLayout.startsWith('item'))
 	{
 		//styleColor = this.isDarkColor(cornerColor) ? ibmConfig.ibmColors.white : lineColor;
+		/*SAVE
 		if (shapeLayout === 'itemStyle')
 			styleColor = lineColor;
 		else
 			styleColor = this.normalizeFontColor(styleColor, cornerColor);
+		*/
 
-		if (shapeLayout === 'itemIcon')
-			iconColor = ibmConfig.ibmColors.black;
+		//SAVE if (shapeLayout === 'itemIcon')
+		//SAVE	iconColor = ibmConfig.ibmColors.black;
 
 		if (styleDashed)
 			//secondLine = this.isDarkColor(cornerColor);
@@ -361,13 +385,17 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 		if (shapeType === 'target')
 		{
-			fontColor = this.normalizeFontColor(fontColor, cornerColor);
+			//SAVE fontColor = this.normalizeFontColor(fontColor, cornerColor);
 
+			/*SAVE
 			if (styleStrikethrough)
 				//styleColor = this.isDarkColor(cornerColor) ?  ibmConfig.ibmColors.white : lineColor;
 				styleColor = this.normalizeFontColor(styleColor, cornerColor);
 			else if (styleDashed)
 				//secondLine = this.isDarkColor(cornerColor);
+				secondLine = false;
+			*/
+			if (styleDashed)
 				secondLine = false;
 		}
 	}
