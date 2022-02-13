@@ -45,21 +45,21 @@
 
         "Logical Icon Legend": {"format": "$LEGEND_VERTICAL", "$LEGEND_DEFAULT_PROPERTIES": null,
 		"members": ["Cloud", "VPC", "Subnet", "Virtual Server", "Region", "Zone"]},
-        "Cloud": {"icon": "cloud", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "VPC": {"icon": "virtual-private-cloud", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Subnet": {"icon": "locked", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Virtual Server": {"icon": "instance--virtual", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "Cloud": {"icon": "cloud", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "VPC": {"icon": "virtual-private-cloud", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "Subnet": {"icon": "locked", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "Virtual Server": {"icon": "instance--virtual", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
 
         "Prescribed Icon Legend": {"format": "$LEGEND_VERTICAL", "$LEGEND_DEFAULT_PROPERTIES": null,
 		"members": ["IBM Cloud", "IBM VPC", "IBM Subnet", "IBM Virtual Server", "IBM Satellite", "RedHat OpenShift", "Region", "Zone"]},
-        "IBM Cloud": {"icon": "ibm-cloud", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "IBM VPC": {"icon": "virtual-private-cloud--alt", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "IBM Subnet": {"icon": "ibm-cloud--subnets", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "IBM Virtual Server": {"icon": "instance--virtual", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "IBM Satellite": {"icon": "cloud-satellite", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "RedHat OpenShift": {"icon": "logo--openshift", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Region": {"icon": "location", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
-        "Zone": {"icon": "data--center", "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null}
+        "IBM Cloud": {"icon": "ibm-cloud", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "IBM VPC": {"icon": "virtual-private-cloud--alt", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "IBM Subnet": {"icon": "ibm-cloud--subnets", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "IBM Virtual Server": {"icon": "instance--virtual", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "IBM Satellite": {"icon": "cloud-satellite", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "RedHat OpenShift": {"icon": "logo--openshift", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "Region": {"icon": "location", "text": null, "subtext": null,  "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null},
+        "Zone": {"icon": "data--center", "text": null, "subtext": null, "format": "$ITEM_ICON", "color": "$ITEM_DEFAULT_COLOR", "$ITEM_ICON_DEFAULT_PROPERTIES": null}
       },
 
       "Shapes": {
@@ -149,7 +149,7 @@
     "$ITEM_DEFAULT_STYLE": {"dashed": false, "double": false, "strikethrough": false, "multiplicity": false},
     "$ITEM_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
     "$ITEM_BADGE_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$ITEM_DEFAULT_COLOR", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
-    "$ITEM_ICON_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
+    "$ITEM_ICON_DEFAULT_PROPERTIES": {"color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
     "$ITEM_COLOR_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "badge": "$ITEM_DEFAULT_BADGE", "style": "$ITEM_DEFAULT_STYLE", "ignore": true},
     "$ITEM_STYLE_DEFAULT_PROPERTIES": {"text": null, "subtext": null, "icon": "undefined", "color": "$ITEM_DEFAULT_COLOR", "badge": "$ITEM_DEFAULT_BADGE", "ignore": true},
 

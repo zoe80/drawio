@@ -109,7 +109,7 @@
     "$CYAN_LIGHTFILL": {"line": "cyan", "fill": "lightcyan", "font": null},
     "$CYAN_WHITEFILL": {"line": "cyan", "fill": "white", "font": null},
 
-    "$TEMPLATE_DEFAULT_PROPERTIES": {"badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "header": true, "ignore": false},
-    "$SUBTEMPLATE_DEFAULT_PROPERTIES": {"badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "header": true, "ignore": true}
+    "$TEMPLATE_DEFAULT_PROPERTIES": {"badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": false},
+    "$SUBTEMPLATE_DEFAULT_PROPERTIES": {"badge": "$DEFAULT_BADGE", "style": "$DEFAULT_STYLE", "ignore": true}
   }
 }

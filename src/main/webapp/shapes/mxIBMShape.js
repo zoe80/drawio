@@ -30,6 +30,54 @@ mxIBMShapeBase.prototype.cst = ibmConfig.ibmBaseConstants;
 
 mxIBMShapeBase.prototype.customProperties = ibmConfig.ibmBaseProperties;
 
+// Get properties corresponding to shape layout and convert to styles.
+mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
+{
+	let properties = '';
+	let styles = {};
+
+	if (shapeLayout === "collapsed")
+		// Add collapsed text properties and remove expanded stack and container properties.
+		properties = ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+	else if (shapeLayout === "expanded")
+		// Add expanded text and container properties and remove expanded stack properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+	else if (shapeLayout === "expandedStack")
+		// Add expanded text, expanded stack properties, and container properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
+	else if (shapeLayout.startsWith("group"))
+		// Add expanded text and container properties and remove expanded stack properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+	else
+		// Remove expanded stack and container properties.
+		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+// Set cell styles.
+mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
+{
+	let cells = graph.getSelectionCells();
+	let styles = this.getCellStyles(shapeType);
+
+	for (let key in styles)
+		graph.setCellStyles(key, styles[key], cells);
+};
+
 // Convert RGB values to hex values.
 mxIBMShapeBase.prototype.rgb2hex = function(color)
 {
@@ -49,6 +97,11 @@ mxIBMShapeBase.prototype.rgb2hex = function(color)
 	}
 	else
 		return color;
+}
+
+// Normalize line color.
+mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
+{
 }
 
 // Normalize font/icon/style color to be visible if lineColor is too dark.
@@ -104,37 +157,16 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 // Retrieve color settings.
 mxIBMShapeBase.prototype.getColors = function(shape)
 {
-	/*
-	function rgb2hex(color)
-	{
-		if (color.toUpperCase().startsWith('RGB'))
-		{
-			let rgb = color.split(',');
-			let r = parseInt(rgb[0].substring(4));
-			let g = parseInt(rgb[1]);
-			let b = parseInt(rgb[2]);
-			var rhex = Number(r).toString(16)
-			rhex = (rhex.length < 2) ? "0" + rhex : rhex;
-			var ghex = Number(r).toString(16)
-			ghex = (ghex.length < 2) ? "0" + ghex : ghex;
-			var bhex = Number(r).toString(16)
-			bhex = (bhex.length < 2) ? "0" + bhex : bhex;
-			return "#" + rhex.toString() + ghex.toString() + bhex.toString();
-		}
-		else
-			return color;
-	}
-	*/
-
 	// Retrieve color settings.
-	//let lineColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.LINE_COLOR, mxIBMShapeBase.prototype.cst.LINE_COLOR_DEFAULT);
-	//let fillColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);
-	//let fontColor = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.FONT_COLOR, mxIBMShapeBase.prototype.cst.FONT_COLOR_DEFAULT);
-	//let badgeColor = mxUtils.getValue(shape.state.style,mxIBMShapeBase.prototype.cst.BADGE_COLOR, mxIBMShapeBase.prototype.cst.BADGE_COLOR_DEFAULT);
 	let lineColor = mxUtils.getValue(shape.state.style, this.cst.LINE_COLOR, this.cst.LINE_COLOR_DEFAULT);
 	let fillColor = mxUtils.getValue(shape.state.style, this.cst.FILL_COLOR, this.cst.FILL_COLOR_DEFAULT);
 	let fontColor = mxUtils.getValue(shape.state.style, this.cst.FONT_COLOR, this.cst.FONT_COLOR_DEFAULT);
 	let badgeColor = mxUtils.getValue(shape.state.style, this.cst.BADGE_COLOR, this.cst.BADGE_COLOR_DEFAULT);
+
+	let badgeFontColor = fontColor;
+	let iconColor = fontColor;
+	let iconAreaColor = lineColor;
+	let styleColor = lineColor;
 
 	// Set line color to black if not set otherwise use line color.
 	lineColor = (lineColor === this.cst.LINE_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(lineColor);
@@ -144,8 +176,6 @@ mxIBMShapeBase.prototype.getColors = function(shape)
 
 	// Set font and icon colors to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
-	let badgeFontColor = fontColor;
-	let iconColor = fontColor;
 
 	// Set badge color to line color if not set otherwise use badge color.
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
@@ -155,7 +185,9 @@ mxIBMShapeBase.prototype.getColors = function(shape)
 		'fontColor': fontColor, 
 		'badgeColor': badgeColor,
 		'badgeFontColor': badgeFontColor,
-		'iconColor': iconColor};
+		'iconColor': iconColor,
+		'iconAreaColor': iconAreaColor,
+		'styleColor': styleColor};
 }
 
 // Retrieve size and color details.
@@ -210,8 +242,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 		details['badgeColor'] = colors.badgeColor;
 		details['badgeFontColor'] = colors.badgeFontColor;
 		details['iconColor'] = colors.iconColor;
-		details['iconAreaColor']  = colors.lineColor;
-		details['styleColor']  = colors.lineColor;
+		details['iconAreaColor']  = colors.iconAreaColor;
+		details['styleColor']  = colors.styleColor;
 	}
 
 	return details;
@@ -416,7 +448,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	};
 };
 
-mxIBMShapeBase.prototype.getCellStyles = function(cellProps)
+mxIBMShapeBase.prototype.getCellStyles2 = function(cellProps)
 {
 	let cellStyles = {};
 
@@ -441,24 +473,24 @@ mxIBMShapeBase.prototype.getCellLayout = function(value)
 
 	if (value === "collapsed")
 		// Add collapsed text properties and remove expanded stack and container properties.
-		cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
 	else if (value === "expanded")
 		// Add expanded text and container properties and remove expanded stack properties.
-		cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
 	else if (value === "expandedStack")
 		// Add expanded text, expanded stack properties, and container properties.
-		cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container);
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container);
 	else if (value.startsWith("group"))
 		// Add expanded text and container properties and remove expanded stack properties.
-		cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
 	else
 		// Remove expanded stack and container properties.
-		cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
   
 	return {cellStyles};
 };
 
-mxIBMShapeBase.prototype.setCellStyles = function(graph, change) 
+mxIBMShapeBase.prototype.setCellStyles2 = function(graph, change) 
 {
 	let stylesForCells = this.getCellLayout(change).cellStyles;  
 
@@ -1259,7 +1291,7 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, /*@S
 		//shapeStyle.spacingBottom = this.textSpacing;
 
 		// Default label to bottom which can be repositioned by user.
-		let cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.collapsedText);
+		let cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedText);
 
 		for (let key in cellStyles) 
 			style = mxUtils.setStyle(style, key, cellStyles[key]);
@@ -1286,19 +1318,19 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, /*@S
 		if (shapeType === 'target')
 		{
 			if (hideIcon) 
-				cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedTargetTextNoIcon);
+				cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedTargetTextNoIcon);
 			else
-				cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedTargetText);
+				cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedTargetText);
 		}
 		else
-			cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.expandedText);
+			cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedText);
 
 		for (let key in cellStyles) 
 			style = mxUtils.setStyle(style, key, cellStyles[key]);
 	}
 	else if (shapeLayout.startsWith('item'))
 	{
-		let cellStyles = this.getCellStyles(ibmConfig.ibmSystemProperties.itemText);
+		let cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.itemText);
 
 		for (let key in cellStyles) 
 			style = mxUtils.setStyle(style, key, cellStyles[key]);
