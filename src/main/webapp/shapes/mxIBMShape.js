@@ -180,8 +180,8 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set font and icon colors to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
-	// Normalize font color to be visible for target shape type.
-	fontColor = (shapeType === 'target') ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
+	// Normalize font color to be visible for expanded target shape type.
+	fontColor = (shapeType === 'target' && shapeLayout.startsWith('expanded')) ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
 
 	// Set badge color to line color if not set otherwise use badge color.
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
@@ -332,8 +332,9 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 	//let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, height, width);
 
-	let cornerWidth = (cornerVisible) ? details.cornerWidth : 0;
-	let cornerHeight = details.minHeight;
+	let iconAreaWidth = (cornerVisible) ? details.iconAreaWidth : 0;
+	//let cornerHeight = details.minHeight;
+	let cornerHeight = details.iconAreaHeight;
 
 	//let barVisible = (shapeType === 'pg' || shapeType === 'lg');
 	let barVisible = shapeType.startsWith('group');
@@ -400,19 +401,19 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		}
 	}
 
-	let labelOffset = 0;
+	let labelAlign = 0;
 
 	if (shapeLayout === 'collapsed' || shapeLayout.startsWith('item'))
 	{
-		labelOffset = details.labelOffset;
+		labelAlign = details.labelAlign;
 	}
 	else if (shapeLayout.startsWith('expanded'))
 	{
-		labelOffset = cornerWidth;
+		labelAlign = iconAreaWidth;
 
 		if (shapeType === 'target')
 		{
-			labelOffset = (!hideIcon) ? labelOffset : 0;
+			labelAlign = (!hideIcon) ? labelAlign : 0;
 		}
 	}
 
@@ -433,7 +434,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'styleMultiplicity': styleMultiplicity,
 
 		'secondLine': secondLine,
-		'labelOffset': labelOffset,
+		'labelAlign': labelAlign,
 		'labelHeight': labelHeight,
 
 		'barVisible': barVisible,
@@ -462,13 +463,13 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'cornerVisible': cornerVisible,
 		'iconColor': iconColor,
 
-		'cornerWidth': cornerWidth,
+		'iconAreaWidth': iconAreaWidth,
 		'cornerHeight': cornerHeight,
 
 		'shapeWidth': details.shapeWidth,
 		'shapeHeight': details.shapeHeight,
 		'curveRadius': details.curveRadius,
-		'shapeLeftOffset': details.shapeLeftOffset,
+		'shapeAlign': details.shapeAlign,
 		'doubleAlign': details.doubleAlign,
 		'multiplicityAlign': details.multiplicityAlign,
 		'iconSize': details.iconSize,
@@ -821,7 +822,7 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 		//else if (pop.shapeType === 'ts')
 		else if (pop.shapeType === 'target')
 		{
-			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.curveRadius, doubleStyleOffset, pop.shapeLeftOffset);
+			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.curveRadius, doubleStyleOffset, pop.shapeAlign);
 		}
 		//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 		else if (pop.shapeType === 'nodel' || pop.shapeType === 'compl')
@@ -834,8 +835,8 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 			{
 				c.begin();
 				c.moveTo(pop.curveRadius, 0);
-				c.lineTo(pop.cornerWidth, 0);
-				c.lineTo(pop.cornerWidth, pop.cornerHeight);
+				c.lineTo(pop.iconAreaWidth, 0);
+				c.lineTo(pop.iconAreaWidth, pop.cornerHeight);
 				if (pop.sidebarHeight < pop.shapeHeight)
 				{
 					c.lineTo(0, pop.cornerHeight);
@@ -852,7 +853,7 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 		}
 		else
 		{
-			mxIBMShapeBase.prototype.paintRectangle(c, pop.cornerWidth, pop.cornerHeight, doubleStyleOffset);
+			mxIBMShapeBase.prototype.paintRectangle(c, pop.iconAreaWidth, pop.cornerHeight, doubleStyleOffset);
 		}
 		
 		c.fill();
@@ -971,7 +972,7 @@ mxIBMShapeBase.prototype.paintShapeOutline = function(c, doubleStyleOffset)
 		mxIBMShapeBase.prototype.paintActor(c, pop.shapeWidth, doubleStyleOffset);
 	//else if (pop.shapeType === 'ts')
 	else if (pop.shapeType === 'target')
-		mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset, pop.shapeLeftOffset);
+		mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset, pop.shapeAlign);
 	//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 	else if (pop.shapeType.slice(-1)  === 'l')
 		mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
@@ -995,7 +996,7 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 	let pop = this.shapeProperties;
 
 	if (pop.styleStrikethrough) {
-		let leftCornerX = (pop.shapeLayout.startsWith('expanded')) ? pop.cornerWidth : 0;
+		let leftCornerX = (pop.shapeLayout.startsWith('expanded')) ? pop.iconAreaWidth : 0;
 		let leftCornerY = 0;
 		let rightCornerX = pop.shapeWidth;
 		let rightCornerY = (pop.shapeLayout.startsWith('expanded')) ? pop.labelHeight : pop.shapeHeight;
@@ -1020,12 +1021,12 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 				let r = pop.curveRadius;
 				let angle = 125;
 
-				leftCornerX = pop.shapeLeftOffset + getCornerX(angle, r);
+				leftCornerX = pop.shapeAlign + getCornerX(angle, r);
 				leftCornerY = getCornerY(angle, r);
 
 				let h = (pop.shapeLayout === 'collapsed') ? 16 : 0;
 				angle = 305;
-				rightCornerX = h + pop.shapeLeftOffset + getCornerX(angle, r);
+				rightCornerX = h + pop.shapeAlign + getCornerX(angle, r);
 				rightCornerY = getCornerY(angle, r);
 			}
 			else {
@@ -1122,7 +1123,7 @@ mxIBMShapeBase.prototype.paintBadge = function(c)
 		const badgeSpaceRight = -1 * badgeHeight / 2 - badgeOffset;
 		if (pop.shapeLayout.startsWith('item')) {
 			rightBadgeX = badgeWidth;
-			pop.labelOffset = 15 + extraTextWidth + 8;
+			pop.labelAlign = 15 + extraTextWidth + 8;
 		}
 		else
 			rightBadgeX = pop.shapeWidth - badgeSpaceRight;
@@ -1194,7 +1195,7 @@ mxIBMShapeBase.prototype.paintShapeMultiplicity = function(c) {
 	let pop = this.shapeProperties;
 
 	if (pop.styleMultiplicity) {
-		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicityAlign, radius: pop.curveRadius, offset: pop.shapeLeftOffset };
+		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicityAlign, radius: pop.curveRadius, offset: pop.shapeAlign };
 		let numbers = [1, 2];
 
 		c.begin();
@@ -1232,8 +1233,8 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 
 	if (!pop.hideIcon)
 	{
-		//let positionX = (pop.shapeType === 'lg' || pop.shapeType  === 'pg') ? pop.cornerWidth - pop.iconSize : pop.cornerWidth/2 - pop.iconSize/2;
-		let positionX = pop.shapeType.startsWith('group') ? pop.cornerWidth - pop.iconSize : pop.cornerWidth/2 - pop.iconSize/2;
+		//let positionX = (pop.shapeType === 'lg' || pop.shapeType  === 'pg') ? pop.iconAreaWidth - pop.iconSize : pop.iconAreaWidth/2 - pop.iconSize/2;
+		let positionX = pop.shapeType.startsWith('group') ? pop.iconAreaWidth - pop.iconSize : pop.iconAreaWidth/2 - pop.iconSize/2;
 		//positionX = (pop.shapeLayout === 'expanded' && pop.shapeType  === 'ts') ? positionX + pop.curveRadius/2 : positionX;
 		positionX = (pop.shapeLayout.startsWith('expanded') && pop.shapeType  === 'target') ? positionX + pop.curveRadius/2 : positionX;
 		positionX = (pop.shapeLayout.startsWith('item')) ? 0 : positionX;
@@ -1411,8 +1412,8 @@ mxIBMShapeBase.prototype.getLabelBounds = function(rect)
 {
 	let pop = this.shapeProperties;
 
-	return new mxRectangle(rect.x + pop.labelOffset * this.scale, 
-				rect.y, rect.width - (pop.labelOffset * this.scale),
+	return new mxRectangle(rect.x + pop.labelAlign * this.scale, 
+				rect.y, rect.width - (pop.labelAlign * this.scale),
 				pop.labelHeight * this.scale);
 };
 
@@ -1810,7 +1811,7 @@ mxIBMShapeUnit.prototype.customProperties = ibmConfig.ibmUnitProperties;
 mxIBMShapeUnit.prototype.getProperties = function(shape)
 {
 	let labelHeight = 16;
-	let labelOffset = 24;
+	let labelAlign = 24;
 	let hideIcon = false;
 	let rotateIcon = 0;
 	let iconColor = ibmConfig.ibmColors.black;
@@ -1823,7 +1824,7 @@ mxIBMShapeUnit.prototype.getProperties = function(shape)
 
 	return {
 		'labelHeight': labelHeight,
-		'labelOffset': labelOffset,
+		'labelAlign': labelAlign,
 
 		'hideIcon': hideIcon,
 		'rotateIcon': rotateIcon,
@@ -1934,9 +1935,9 @@ mxIBMShapeUnit.prototype.getLabelBounds = function(rect)
 {
 	let pop = this.shapeProperties;
 
-	return new mxRectangle(rect.x + pop.labelOffset * this.scale, 
+	return new mxRectangle(rect.x + pop.labelAlign * this.scale, 
 				rect.y,
-				rect.width - (pop.labelOffset * this.scale),
+				rect.width - (pop.labelAlign * this.scale),
 				pop.labelHeight * this.scale);
 };
 
