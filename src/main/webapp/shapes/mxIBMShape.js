@@ -30,53 +30,6 @@ mxIBMShapeBase.prototype.cst = ibmConfig.ibmBaseConstants;
 
 mxIBMShapeBase.prototype.customProperties = ibmConfig.ibmBaseProperties;
 
-// Get properties corresponding to shape layout and convert to styles.
-mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
-{
-	let properties = '';
-	let styles = {};
-
-	if (shapeLayout === "collapsed")
-		// Add collapsed text properties and remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
-	else if (shapeLayout === "expanded")
-		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
-	else if (shapeLayout === "expandedStack")
-		// Add expanded text, expanded stack properties, and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
-	else if (shapeLayout.startsWith("group"))
-		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
-	else
-		// Remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
-
-	properties = properties.slice(0, -1); // Remove trailing semicolon.
-
-	let array = properties.split(';');
-
-	for (var index = 0; index < array.length; index++)
-	{
-		element = array[index].split('=');
-		if (element[1] === 'null')
-			styles[element[0]] = null;
-		else	
-			styles[element[0]] = element[1];
-	}
-
-	return styles;
-}
-
-// Set cell styles.
-mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
-{
-	let cells = graph.getSelectionCells();
-	let styles = this.getCellStyles(shapeType);
-
-	for (let key in styles)
-		graph.setCellStyles(key, styles[key], cells);
-};
 
 // Convert RGB values to hex values.
 mxIBMShapeBase.prototype.rgb2hex = function(color)
@@ -216,6 +169,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 {
 	let details = {};
 
+	// Get shape-specific sizes.
+	
 	if (shapeLayout === 'collapsed') {
 		if (shapeType === 'target') 
 			details = ibmConfig.ibmShapeSizes.collapsedTarget;
@@ -254,6 +209,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 	else
 		details = ibmConfig.ibmShapeSizes.empty;
 
+	// Add shape colors.
+	
 	if (shape) {
 		let colors = this.getColors(shape, shapeType, shapeLayout);
 
@@ -269,6 +226,59 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 
 	return details;
 }
+
+// Get properties corresponding to shape layout and convert to styles.
+mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
+{
+	let properties = '';
+	let styles = {};
+
+	// Get shape-specific properties.
+	
+	if (shapeLayout === "collapsed")
+		// Add collapsed text properties and remove expanded stack and container properties.
+		properties = ibmConfig.ibmSystemProperties.collapsedText + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+	else if (shapeLayout === "expanded")
+		// Add expanded text and container properties and remove expanded stack properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+	else if (shapeLayout === "expandedStack")
+		// Add expanded text, expanded stack properties, and container properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
+	else if (shapeLayout.startsWith("group"))
+		// Add expanded text and container properties and remove expanded stack properties.
+		properties = ibmConfig.ibmSystemProperties.expandedText + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+	else
+		// Remove expanded stack and container properties.
+		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+
+	// Convert properties to a style dictionary.
+	
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+// Set cell styles.
+mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
+{
+	let cells = graph.getSelectionCells();
+	let styles = this.getCellStyles(shapeType);
+
+	for (let key in styles)
+		graph.setCellStyles(key, styles[key], cells);
+};
+
 
 mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 {
