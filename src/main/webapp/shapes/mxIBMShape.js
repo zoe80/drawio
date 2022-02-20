@@ -609,6 +609,11 @@ mxIBMShapeBase.prototype.handleEvents = function()
 					const checkAttrs = ['Icon-Name', 'Badge-Text'];
 					const { current, previous } = { current: evt.properties.change.value.attributes, previous: evt.properties.change.previous.attributes };
 					const needDraw = checkAttrs.some(it => (current.getNamedItem(it) && current.getNamedItem(it).value) !== (previous.getNamedItem(it) && previous.getNamedItem(it).value));
+					//console.log("");
+					//console.log("mxValueChange:");
+					//console.log(current);
+					//console.log(previous);
+					//console.log(evt.properties);
 					if (needDraw)
 						this.redraw();
 				}
@@ -651,6 +656,19 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							styleNew = updatedStyle.style;
 							shapeLayout.current = updatedStyle.shapeLayout;
 							needApplyStyle = style.current !== styleNew;
+
+							if (shapeType.isChanged)
+							{
+								const needDraw = false;
+								//console.log("");
+								//console.log("shapeType.isChanged:");
+								//console.log(shapeType);
+								//console.log(styleNew);
+								//console.log(evt.properties);
+								//console.log(evt.properties.getAttribute("NamedNodeMap", "3"));
+								if (needDraw)
+									this.redraw();
+							}
 						}
 						
 						var needApplyGeo = shapeType.isChanged || shapeLayout.isChanged;
