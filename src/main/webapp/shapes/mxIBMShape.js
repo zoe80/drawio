@@ -288,6 +288,19 @@ mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
 		graph.setCellStyles(key, styles[key], cells);
 };
 
+// Return switch icon if switching between logical to prescribed or prescribed to logical.
+mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
+{
+	if (previousType.slice(-1) === 'l' && currentType.slice(-1) === 'p')
+		// Lookup logical icon in ibmIcons and switch to prescribed icon if available.
+		return("undefined");
+	else if (previousType.slice(-1) === 'p' && currentType.slice(-1) === 'l')
+		// Lookup prescribed icon in ibmIcons and switch to logical icon if available.
+		return("undefined");
+	else
+		return previousIcon;
+}
+
 mxIBMShapeBase.prototype.getDimensions = function(shape, shapeType, shapeLayout, width, height)
 {
                 let minWidth = 0;
@@ -460,7 +473,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 
 	//SAVE let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, width, height);
 	let details = mxIBMShapeBase.prototype.getDimensions(shape, shapeType, shapeLayout, width, height);
-	
+
 	//let colors = this.getColors(shape);
 
 	let lineColor = details.lineColor;
