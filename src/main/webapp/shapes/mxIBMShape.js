@@ -62,29 +62,7 @@ mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
 {
 }
 
-// Normalize font/icon/style color to be visible if lineColor is too dark.
-mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
-{
-	if (lineColor === "none")
-		return fontColor;
-	else if (lineColor === ibmConfig.ibmColors.black)
-		return ibmConfig.ibmColors.white;
-
-	lineColor = lineColor.toUpperCase();
-	let name = ibmConfig.colorNames[lineColor.substring(1)];
-	let segments = name.split(' ');
-
-	for (var index = 0; index < segments.length; index++)
-	{
-		code = parseInt(segments[index]);
-		if (!isNaN(code) && code >= 50)
-			return ibmConfig.ibmColors.white;
-	}
-
-	return fontColor;
-}
-
-// Normalize fill color to match line color.
+// Normalize fill color and line color.
 mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 {
 	let fillColorHex = this.rgb2hex(fillColor);
@@ -110,6 +88,28 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
 
                 return ibmConfig.ibmColors["light" + lineColorFamily]; 
         }
+}
+
+// Normalize font/icon/style color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
+{
+	if (lineColor === "none")
+		return fontColor;
+	else if (lineColor === ibmConfig.ibmColors.black)
+		return ibmConfig.ibmColors.white;
+
+	lineColor = lineColor.toUpperCase();
+	let name = ibmConfig.colorNames[lineColor.substring(1)];
+	let segments = name.split(' ');
+
+	for (var index = 0; index < segments.length; index++)
+	{
+		code = parseInt(segments[index]);
+		if (!isNaN(code) && code >= 50)
+			return ibmConfig.ibmColors.white;
+	}
+
+	return fontColor;
 }
 
 // Retrieve color settings.
@@ -170,66 +170,70 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 }
 
 // Retrieve size and color details.
-mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeHeight, shapeWidth)
+mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, shapeWidth, shapeHeight)
 {
-	let details = {};
+        let details = {};
 
-	// Get shape-specific sizes.
-	
-	if (shapeLayout === 'collapsed') {
-		if (shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.collapsedTarget;
-		else if (shapeType === 'actor') 
-			details = ibmConfig.ibmShapeSizes.collapsedActor;
-		else
-			details = ibmConfig.ibmShapeSizes.collapsed;
+        // Get shape-specific sizes.
 
-		details['shapeHeight'] = shapeHeight;
-		details['shapeWidth'] = shapeWidth;
-	}
-	else if (shapeLayout.startsWith('expanded')) {
-		if (shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.expandedTarget;
-		else if (shapeType.startsWith('group')) 
-			details = ibmConfig.ibmShapeSizes.group;
-		else
-			details = ibmConfig.ibmShapeSizes.expanded;
+        if (shapeLayout === 'collapsed') {
+                if (shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.collapsedTarget;
+                else if (shapeType === 'actor')
+                        details = ibmConfig.ibmShapeSizes.collapsedActor;
+                else
+                        details = ibmConfig.ibmShapeSizes.collapsed;
 
-		details['shapeHeight'] = shapeHeight;
-		details['shapeWidth'] = shapeWidth;
-	}
-	else if (shapeLayout.startsWith('item')) {
-		if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
-			details = ibmConfig.ibmShapeSizes.itemStyleColorBadge;
-		else if (shapeLayout === 'itemIcon' && shapeType === 'target') 
-			details = ibmConfig.ibmShapeSizes.itemTarget;
-		else if (shapeLayout === 'itemIcon' && shapeType === 'actor') 
-			details = ibmConfig.ibmShapeSizes.itemActor;
-		else if (shapeLayout === 'itemShape' || shapeLayout === 'itemIcon')
-			details = ibmConfig.ibmShapeSizes.itemShapeIcon;
+                details['shapeWidth'] = shapeWidth;
+                details['shapeHeight'] = shapeHeight;
+        }
+        else if (shapeLayout.startsWith('expanded')) {
+                if (shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.expandedTarget;
+                else if (shapeType.startsWith('group'))
+                        details = ibmConfig.ibmShapeSizes.group;
+                else
+                        details = ibmConfig.ibmShapeSizes.expanded;
 
-		details['shapeHeight'] = details.defaultHeight;
-		details['shapeWidth'] = details.defaultWidth;
-	}
-	else
-		details = ibmConfig.ibmShapeSizes.empty;
+                details['shapeWidth'] = shapeWidth;
+                details['shapeHeight'] = shapeHeight;
+        }
+        else {
+                if (shapeLayout === 'itemBadge')
+                        details = ibmConfig.ibmShapeSizes.itemBadge;
+                else if (shapeLayout === 'itemColor')
+                        details = ibmConfig.ibmShapeSizes.itemColor;
+                else if (shapeLayout === 'itemStyle')
+                        details = ibmConfig.ibmShapeSizes.itemStyle;
+                else if (shapeLayout === 'itemIcon' && shapeType === 'target')
+                        details = ibmConfig.ibmShapeSizes.itemTarget;
+                else if (shapeLayout === 'itemIcon' && shapeType === 'actor')
+                        details = ibmConfig.ibmShapeSizes.itemActor;
+                else if (shapeLayout === 'itemIcon')
+                        details = ibmConfig.ibmShapeSizes.itemIcon;
+                else // (shapeLayout === 'itemShape')
+                        details = ibmConfig.ibmShapeSizes.itemShape;
 
-	// Add shape colors.
-	
-	if (shape) {
-		let colors = this.getColors(shape, shapeType, shapeLayout);
+                details['shapeWidth'] = details.defaultWidth;
+                details['shapeHeight'] = details.defaultHeight;
+        }
 
-		details['lineColor'] = colors.lineColor;
-		details['fillColor'] = colors.fillColor;
-		details['fontColor'] = colors.fontColor;
-		details['badgeColor'] = colors.badgeColor;
-		details['badgeFontColor'] = colors.badgeFontColor;
-		details['iconColor'] = colors.iconColor;
-		details['iconAreaColor']  = colors.iconAreaColor;
-		details['styleColor']  = colors.styleColor;
-	}
+        // Add shape colors.
 
-	return details;
+        if (shape) {
+                let colors = this.getColors(shape, shapeType, shapeLayout);
+
+                details['lineColor'] = colors.lineColor;
+                details['fillColor'] = colors.fillColor;
+                details['fontColor'] = colors.fontColor;
+                details['badgeColor'] = colors.badgeColor;
+                details['badgeFontColor'] = colors.badgeFontColor;
+                details['iconColor'] = colors.iconColor;
+                details['iconAreaColor']  = colors.iconAreaColor;
+                details['styleColor']  = colors.styleColor;
+        }
+
+        return details;
 }
 
 // Get properties corresponding to shape layout and convert to styles.
@@ -284,6 +288,141 @@ mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
 		graph.setCellStyles(key, styles[key], cells);
 };
 
+mxIBMShapeBase.prototype.getDimensions = function(shape, shapeType, shapeLayout, width, height)
+{
+                let minWidth = 0;
+                let defaultWidth = 0;
+                let minHeight = shapeLayout.startsWith('item') ? 16 : 48;
+
+                let labelHeight = shapeLayout.startsWith('expanded') ? 48 : 16;
+                let labelAlign = 0;
+                
+                let shapeWidth = width;
+                let shapeHeight = shapeLayout.startsWith('legend') ? 16 : height;
+                let curveRadius = (shapeType === 'target' || shapeType === 'actor') ? 24 : 8;
+                let shapeAlign = (shapeType === 'target' && shapeLayout === 'itemShape') ? -2 : 0;
+                
+                let sidebarWidth = 0;
+                let sidebarHeight = 0;
+
+                let sidetickWidth = 8;
+                let sidetickHeight = 4;
+                let sidetickLeftStart = -4;
+
+                let multiplicityOffset = 4;
+                let doubleOffset = 3;
+
+                let iconSize = 20;
+                let iconSpacing = 14;
+
+                let iconAreaWidth = 0;
+
+                if (shapeLayout === 'collapsed')
+                {
+                        minWidth = (shapeType === 'target') ? 64 : 48;
+                        defaultWidth = minWidth;
+                        labelAlign = 0;
+
+                        iconAreaWidth = minWidth;
+                }
+                else if (shapeLayout.startsWith('expanded'))
+                {
+                        minWidth = 96;
+                        defaultWidth = 240;
+                        defaultRectHeight = 152;
+                        labelAlign = null;
+                        
+                        if (shapeType.startsWith('group'))
+                                iconAreaWidth = 1*iconSpacing + iconSize
+                        else if (shapeType === 'target')
+                                iconAreaWidth = 1*iconSpacing + iconSize - 4;
+                        else
+                                iconAreaWidth = 2*iconSpacing + iconSize;
+
+
+                        sidebarWidth = 4;
+                        sidebarHeight = 48;
+                }
+                else if (shapeLayout.startsWith('item'))
+                {
+                        minWidth = 64;
+                        defaultWidth = minWidth;
+
+                        if (shapeLayout === 'itemStyle' || shapeLayout === 'itemColor' || shapeLayout === 'itemBadge')
+                        {
+                                shapeWidth = 32;
+                                labelAlign = 40;
+                        }
+                        else if (shapeType === 'target')
+                        {
+                                shapeWidth = 20;
+                                labelAlign = 24;
+                        }
+                        else
+                        {
+                                shapeWidth = 16;
+                                labelAlign = 24;
+                        }
+                                
+                        curveRadius = (shapeType === 'target' || shapeType === 'actor') ? 8 : 4;
+
+                        iconAreaWidth = shapeWidth;
+
+                        sidebarWidth = 2;
+                        sidebarHeight = 12;
+
+                        sidetickWidth = 4;
+                        sidetickHeight = 2;
+                        sidetickLeftStart = -2;
+
+                        multiplicityOffset = 2;
+                        doubleOffset = 2;
+
+                        iconSize = 16;
+                        iconSpacing = 0;
+                }
+
+		let iconAreaHeight = minHeight;
+		let iconAlign = iconSpacing; 
+
+                let details = {
+                        minWidth, minHeight, defaultWidth,
+                        shapeWidth, shapeHeight, curveRadius, shapeAlign,
+                        iconAreaWidth, sidebarWidth, sidebarHeight,
+                        labelHeight, labelAlign,
+                        sidetickWidth, sidetickHeight, sidetickLeftStart,
+                        multiplicityOffset, doubleOffset,
+                        iconSize, iconAlign,
+			iconAreaHeight
+                };
+
+	// Add shape colors.
+	
+	if (shape) {
+		let colors = this.getColors(shape, shapeType, shapeLayout);
+
+		details['lineColor'] = colors.lineColor;
+		details['fillColor'] = colors.fillColor;
+		details['fontColor'] = colors.fontColor;
+		details['badgeColor'] = colors.badgeColor;
+		details['badgeFontColor'] = colors.badgeFontColor;
+		details['iconColor'] = colors.iconColor;
+		details['iconAreaColor']  = colors.iconAreaColor;
+		details['styleColor']  = colors.styleColor;
+	}
+
+                //return {
+                //        minWidth, minHeight, defaultWidth,
+                //        shapeWidth, shapeHeight, curveRadius, shapeAlign,
+                //        iconAreaWidth, sidebarWidth, sidebarHeight,
+                //        labelHeight, labelAlign,
+                //        sidetickWidth, sidetickHeight, sidetickLeftStart,
+                //        multiplicityOffset, doubleOffset,
+                //        iconSize, iconSpacing
+                //};
+			
+		return details;
+}
 
 mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 {
@@ -319,7 +458,9 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		styleMultiplicity = false;
 	}
 
-	let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, height, width);
+	//SAVE let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, width, height);
+	let details = mxIBMShapeBase.prototype.getDimensions(shape, shapeType, shapeLayout, width, height);
+	
 	//let colors = this.getColors(shape);
 
 	let lineColor = details.lineColor;
@@ -361,7 +502,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let tickVisible = shapeType.startsWith('comp');
 	let sidetickWidth = details.sidetickWidth;
 	let sidetickHeight = details.sidetickHeight;
-	let sidetickAlign = details.sidetickAlign;
+	let sidetickLeftStart = details.sidetickLeftStart;
 
 	let badge = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
 	//let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout === 'expanded' || (shapeLayout === 'item' && shapeSubLayout === 'Badge'));
@@ -462,7 +603,7 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		//'tickColor': tickColor,
 		'sidetickWidth': sidetickWidth,
 		'sidetickHeight': sidetickHeight,
-		'sidetickAlign': sidetickAlign,
+		'sidetickLeftStart': sidetickLeftStart,
 
 		'badge': badge,
 		'badgeVisible': badgeVisible,
@@ -486,8 +627,8 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'shapeHeight': details.shapeHeight,
 		'curveRadius': details.curveRadius,
 		'shapeAlign': details.shapeAlign,
-		'doubleAlign': details.doubleAlign,
-		'multiplicityAlign': details.multiplicityAlign,
+		'doubleOffset': details.doubleOffset,
+		'multiplicityOffset': details.multiplicityOffset,
 		'iconSize': details.iconSize,
 		'iconAlign': details.iconAlign
 	};
@@ -564,11 +705,6 @@ mxIBMShapeBase.prototype.init = function(container)
 
 	let ibmShapeAttributes = ['Badge-Text', 'Icon-Name', 'Primary-Label', 'Secondary-Text'];
 	this.addMissingAttribute(this.state.cell, ibmShapeAttributes);
-	//console.log("this.state.cell:");
-	//console.log(this.state.cell);
-	//console.log(this.state.cell.getAttribute('label'));
-	//console.log(this.state.cell.getAttribute('Primary-Label'));
-	//console.log(this.state.cell.getAttribute('Secondary-Text'));
 
 	mxShape.prototype.init.apply(this, arguments);
 
@@ -609,11 +745,6 @@ mxIBMShapeBase.prototype.handleEvents = function()
 					const checkAttrs = ['Icon-Name', 'Badge-Text'];
 					const { current, previous } = { current: evt.properties.change.value.attributes, previous: evt.properties.change.previous.attributes };
 					const needDraw = checkAttrs.some(it => (current.getNamedItem(it) && current.getNamedItem(it).value) !== (previous.getNamedItem(it) && previous.getNamedItem(it).value));
-					//console.log("");
-					//console.log("mxValueChange:");
-					//console.log(current);
-					//console.log(previous);
-					//console.log(evt.properties);
 					if (needDraw)
 						this.redraw();
 				}
@@ -660,12 +791,6 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							if (shapeType.isChanged)
 							{
 								const needDraw = false;
-								//console.log("");
-								//console.log("shapeType.isChanged:");
-								//console.log(shapeType);
-								//console.log(styleNew);
-								//console.log(evt.properties);
-								//console.log(evt.properties.getAttribute("NamedNodeMap", "3"));
 								if (needDraw)
 									this.redraw();
 							}
@@ -790,7 +915,10 @@ mxIBMShapeBase.prototype.redraw = function()
 
 mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 {
-	let pop = this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
+	//let pop = this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
+	this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
+	console.log("shapeProperties:");
+	console.log(this.shapeProperties);
 
 	c.translate(x, y);
 
@@ -801,7 +929,8 @@ mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 	this.paintStrikethrough(c);
 	this.paintBadge(c);
 
-	this.style.fontColor = pop.fontColor;
+	//this.style.fontColor = pop.fontColor;
+	this.style.fontColor = this.shapeProperties.fontColor;
 	styleCurrent = this.state.view.graph.model.getStyle(this.state.cell);
 	newStyle = mxUtils.setStyle(styleCurrent, 'fontColor', this.style.fontColor);
 	this.state.view.graph.model.setStyle(this.state.cell, newStyle);
@@ -812,9 +941,6 @@ mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 	//obj.setAttribute('label', this.state.cell.value);
 	//this.state.cell.value = obj;
 	//}
-	//console.log("this.state.cell:");
-	//console.log(this.state.cell);
-	//console.log(this.state.cell.getAttribute('label'));
 
 	//this.style.fontColor = pop.fontColor;
 	//styleCurrent = this.state.view.graph.model.getStyle(this.state.cell);
@@ -866,7 +992,7 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 
 	if (pop.cornerVisible)
 	{
-		const doubleStyleOffset = (pop.secondLine) ? pop.doubleAlign : 0;
+		const doubleStyleOffset = (pop.secondLine) ? pop.doubleOffset : 0;
 		c.setFillColor(pop.cornerColor);
 
 		if (pop.shapeType === 'actor')
@@ -984,7 +1110,7 @@ mxIBMShapeBase.prototype.paintShapeStyle = function(c)
 	let pop = this.shapeProperties;
 
 	if (pop.secondLine) {
-		const doubleStyleOffset = pop.doubleAlign;
+		const doubleStyleOffset = pop.doubleOffset;
 
 		c.save();
 		c.setDashed(false, false);
@@ -1136,9 +1262,9 @@ mxIBMShapeBase.prototype.paintShapeDecoration = function(c)
 		c.save();
 		c.setDashed(false);
 		c.setFillColor(ibmConfig.ibmColors.white);
-		c.rect(pop.sidetickAlign, Math.floor(pop.cornerHeight / 4), pop.sidetickWidth, pop.sidetickHeight);
+		c.rect(pop.sidetickLeftStart, Math.floor(pop.cornerHeight / 4), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
-		c.rect(pop.sidetickAlign, Math.floor((pop.cornerHeight / 3) * 2), pop.sidetickWidth, pop.sidetickHeight);
+		c.rect(pop.sidetickLeftStart, Math.floor((pop.cornerHeight / 3) * 2), pop.sidetickWidth, pop.sidetickHeight);
 		c.fillAndStroke();
 		c.restore();
 	}
@@ -1249,7 +1375,7 @@ mxIBMShapeBase.prototype.paintShapeMultiplicity = function(c) {
 	let pop = this.shapeProperties;
 
 	if (pop.styleMultiplicity) {
-		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicityAlign, radius: pop.curveRadius, offset: pop.shapeAlign };
+		let { width, height, radius, space, offset } = { width: pop.shapeWidth, height: pop.shapeHeight, space: pop.multiplicityOffset, radius: pop.curveRadius, offset: pop.shapeAlign };
 		let numbers = [1, 2];
 
 		c.begin();
@@ -1437,11 +1563,7 @@ mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, 
 {
 	if (shapeType != null)
 	{
-		//console.log("this:");
-		//console.log(this);
-	//	console.log(this.state.style.shapeLayout);
-
-		let details = this.getDetails(null, shapeType, shapeLayout, rect.height, rect.width);
+		let details = this.getDetails(null, shapeType, shapeLayout, rect.width, rect.height);
 		rect.width = Math.max(details.minWidth, rect.width);
 		let height = details.minHeight;
 
