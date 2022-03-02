@@ -1439,26 +1439,54 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 		let positionY = pop.cornerHeight/2 - pop.iconSize/2;
 
 		let iconStencilName = this.state.cell.getAttribute('Icon-Name',null) || 'undefined';
+		let iconImageStyle = this.image || 'undefined';
 
-		let iconStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + iconStencilName);
+		let showStencilIcon = true;
+		let stencilIconIsUndefined = (iconStencilName == 'undefined');
 
-		if (iconStencil == null)
-			iconStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+		let showImageIcon = (iconImageStyle != null && iconImageStyle != '' && iconImageStyle != 'undefined');
 
-		if (iconStencil != null)
+		let iconStencil = null;
+		if (showStencilIcon)
 		{
+			iconStencil = mxStencilRegistry.getStencil('mxgraph.ibm.' + iconStencilName);
+
+			if (iconStencil == null)
+			{
+				iconStencil = mxStencilRegistry.getStencil('mxgraph.ibm.undefined');
+				stencilIconIsUndefined = true;
+			}
+
+			showStencilIcon = (iconStencil != null);
+		}
+
+		if (showStencilIcon && !stencilIconIsUndefined)
+			showImageIcon = false;
+		else if (showStencilIcon && stencilIconIsUndefined && showImageIcon)
+			showStencilIcon = false;
+		
+		if (showStencilIcon || showImageIcon)
+		{
+
 			c.save();
 			let canvasCenterX = positionX + pop.iconSize/2;
 			let canvasCenterY = pop.cornerHeight/2;
 		
 			c.rotate(pop.rotateIcon, false, false, canvasCenterX, canvasCenterY);
 			
-			c.setStrokeColor('none');
-			c.setFillColor(pop.iconColor);
-			c.setDashed(false);
+			if (showStencilIcon)
+			{
+				c.setStrokeColor('none');
+				c.setFillColor(pop.iconColor);
+				c.setDashed(false);
 	
-			iconStencil.strokewidth = 1;
-			iconStencil.drawShape(c, this, positionX, positionY, pop.iconSize, pop.iconSize);	
+				iconStencil.strokewidth = 1;
+				iconStencil.drawShape(c, this, positionX, positionY, pop.iconSize, pop.iconSize);	
+			}
+			else if (showImageIcon)
+			{
+				c.image(positionX, positionY, pop.iconSize, pop.iconSize, this.image, true, false, false);
+			}
 			
 			c.restore();
 		}
