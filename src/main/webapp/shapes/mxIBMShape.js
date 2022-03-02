@@ -184,6 +184,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 else
                         details = ibmConfig.ibmShapeSizes.collapsed;
 
+                details['minWidth'] = shapeWidth;
+                details['minHeight'] = shapeHeight;
                 details['shapeWidth'] = shapeWidth;
                 details['shapeHeight'] = shapeHeight;
         }
@@ -214,6 +216,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 else // (shapeLayout === 'itemShape')
                         details = ibmConfig.ibmShapeSizes.itemShape;
 
+                details['minWidth'] = details.defaultWidth;
+                details['minHeight'] = details.defaultHeight;
                 details['shapeWidth'] = details.defaultWidth;
                 details['shapeHeight'] = details.defaultHeight;
         }
