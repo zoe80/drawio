@@ -781,7 +781,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 						//const shapePrevLayoutValues = mxIBMShapeBase.prototype.extractLayouts(shapeLayoutValues.previous);
 						//const shapeLayout = { current: shapeCurrLayoutValues[0], previous: shapePrevLayoutValues[0], isChanged: shapeCurrLayoutValues[0] !== shapePrevLayoutValues[0]};
 						//const shapeSubLayout = { current: shapeCurrLayoutValues[1], previous: shapePrevLayoutValues[1], isChanged: shapeCurrLayoutValues[1] !== shapePrevLayoutValues[1] };
-	
+						
 						//var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || shapeSubLayout.isChanged;
 						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
 
@@ -1494,7 +1494,7 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 };
 
 var shapeStyle = {};
-mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, /*@SAVE positionText,*/ hideIcon, changeExpanded)
+mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, hideIcon, changeExpanded)
 {	
 	if (changeExpanded != null)
 	{
