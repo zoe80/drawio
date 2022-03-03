@@ -197,6 +197,8 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
                 else
                         details = ibmConfig.ibmShapeSizes.expanded;
 
+                details['minWidth'] = shapeWidth;
+                details['minHeight'] = shapeHeight;
                 details['shapeWidth'] = shapeWidth;
                 details['shapeHeight'] = shapeHeight;
         }
@@ -769,8 +771,10 @@ mxIBMShapeBase.prototype.handleEvents = function()
 				{
 					const style = { current: evt.properties.change.style, previous: evt.properties.change.previous };
 					const isIBMShape = (style.current.indexOf(mxIBMShapeBase.prototype.cst.SHAPE) > 0);
+				  	const iconImage = (style.previous.indexOf(mxIBMShapeBase.prototype.cst.SHAPE) > 0 &&
+		  		        			style.current.indexOf("image") > 0);
 
-					if (isIBMShape)
+					if (isIBMShape || iconImage)
 					{
 						const shapeType = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE);
 						const hideIcon = valueStatus(style, mxIBMShapeBase.prototype.cst.HIDE_ICON);
@@ -783,7 +787,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 						//const shapeSubLayout = { current: shapeCurrLayoutValues[1], previous: shapePrevLayoutValues[1], isChanged: shapeCurrLayoutValues[1] !== shapePrevLayoutValues[1] };
 						
 						//var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || shapeSubLayout.isChanged;
-						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged;
+						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || iconImage;
 
 						if (needApplyStyle)
 						{
@@ -800,7 +804,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 									  (currentLayout.startsWith('expanded') && (previousLayout == 'collapsed' || previousLayout.startsWith('item'))) || 
 								          (currentLayout == 'collapsed' && previousLayout != 'collapsed'));
 							var styleNew = style.current;
-							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, hideIcon.current, (changeExpanded ? currentLayout : null) );
+							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, hideIcon.current, iconImage, (changeExpanded ? currentLayout : null) );
 							styleNew = updatedStyle.style;
 							shapeLayout.current = updatedStyle.shapeLayout;
 							needApplyStyle = style.current !== styleNew;
@@ -860,6 +864,11 @@ mxIBMShapeBase.prototype.handleEvents = function()
 					geo.height = geo.height + (this.childCells.length - 1) * Padding;
 				   }
 				   */
+
+				  // Image dropped on shape.
+				  if (style.previous.indexOf(mxIBMShapeBase.prototype.cst.SHAPE) > 0 &&
+		  		        style.current.indexOf("image") > 0) {
+				  }
 				}
 			}
 			catch(err)
@@ -934,8 +943,6 @@ mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 {
 	//let pop = this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
 	this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
-	console.log("shapeProperties:");
-	console.log(this.shapeProperties);
 
 	c.translate(x, y);
 
@@ -1494,8 +1501,13 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 };
 
 var shapeStyle = {};
-mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, hideIcon, changeExpanded)
+mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, hideIcon, iconImage, changeExpanded)
 {	
+	if (iconImage)
+	{
+		style = mxUtils.setStyle(style, 'shape', mxIBMShapeBase.prototype.cst.SHAPE);
+	}
+
 	if (changeExpanded != null)
 	{
 		let stylesForCells = this.getCellLayout(changeExpanded).cellStyles;  
