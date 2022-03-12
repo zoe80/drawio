@@ -90,7 +90,7 @@ mxIBMShapeBase.prototype.normalizeFillColor = function(fillColor, lineColor)
         }
 }
 
-// Normalize font/icon/style color to be visible if lineColor is too dark.
+// Normalize font color to be visible if lineColor is too dark.
 mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 {
 	if (lineColor === "none")
@@ -112,6 +112,18 @@ mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 	return fontColor;
 }
 
+// Normalize icon color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeIconColor = function(iconColor, lineColor)
+{
+	return mxIBMShapeBase.prototype.normalizeFontColor(iconColor, lineColor);
+}
+
+// Normalize style color to be visible if lineColor is too dark.
+mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
+{
+	return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
+}
+
 // Retrieve color settings.
 mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 {
@@ -122,8 +134,9 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	let badgeColor = mxUtils.getValue(shape.state.style, this.cst.BADGE_COLOR, this.cst.BADGE_COLOR_DEFAULT);
 
 	let badgeFontColor = fontColor;
-	let iconColor = fontColor;
+	let iconColor = ibmConfig.ibmColors.black;
 	let iconAreaColor = (shapeType.startsWith('group')) ? 'none' : lineColor;
+	//if (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) iconAreaColor = fillColor;
 	let styleColor = lineColor;
 
 	// Set line color to black if not set otherwise use line color.
@@ -135,7 +148,10 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set fill color to same as line color for legend color items.
 	fillColor = (shapeLayout === 'itemColor') ? lineColor : fillColor;
 
-	// Set font and icon colors to black if not set otherwise use font color.
+	// Set icon area color to fill color for collapsed shapes.
+	iconAreaColor = (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+
+	// Set font color to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
 	// Normalize font color to be visible for expanded target shape type.
@@ -148,16 +164,16 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	badgeFontColor = this.normalizeFontColor(badgeFontColor, badgeColor);
 
 	// Normalize icon color to be visible if icon area color is too dark.
-	iconColor = this.normalizeFontColor(ibmConfig.ibmColors.black, iconAreaColor);
+	iconColor = this.normalizeIconColor(iconColor, iconAreaColor);
 
 	// Set icon color to black for legend icon items.
-	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.black : iconColor;
+	iconColor = (shapeLayout === 'itemIcon') ? ibmConfig.ibmColors.coolgray : iconColor;
 
 	// Normalize style color to be visibile if icon area color is too dark.
-	styleColor = this.normalizeFontColor(styleColor, iconAreaColor);
+	styleColor = this.normalizeStyleColor(styleColor, iconAreaColor);
 
 	// Set style color to black for expanded shapes and legend style items.
-	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? ibmConfig.ibmColors.black : styleColor;
+	styleColor = (shapeLayout.startsWith('expanded') || shapeLayout === 'itemStyle') ? lineColor : styleColor;
 
 	return {'lineColor': lineColor,
 		'fillColor': fillColor, 
@@ -246,19 +262,16 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
 	
 	if (shapeLayout === "collapsed")
 		// Add collapsed text properties and remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+		properties = ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill;
 	else if (shapeLayout === "expanded")
 		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 	else if (shapeLayout === "expandedStack")
 		// Add expanded text, expanded stack properties, and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container;
-	else if (shapeLayout.startsWith("group"))
-		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull;
+		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 	else
 		// Remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.defaultFill;
 
 	// Convert properties to a style dictionary.
 	
@@ -671,20 +684,20 @@ mxIBMShapeBase.prototype.getCellLayout = function(value)
 	let cellStyles = {};
 
 	if (value === "collapsed")
-		// Add collapsed text properties and remove expanded stack and container properties.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
+		// Add collapsed text properties, remove expanded stack properties remove container properties, remove fill.
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill);
 	else if (value === "expanded")
-		// Add expanded text and container properties and remove expanded stack properties.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
+		// Add expanded text properties, add container properties, remove expanded stack properties, add default fill.
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill);
 	else if (value === "expandedStack")
-		// Add expanded text, expanded stack properties, and container properties.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container);
+		// Add expanded text properties, add expanded stack properties, add container properties, add default fill.
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill);
 	else if (value.startsWith("group"))
-		// Add expanded text and container properties and remove expanded stack properties.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull);
+		// Add expanded texti properties , add container properties, remove expanded stack properties, add default fill.
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill);
 	else
-		// Remove expanded stack and container properties.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull);
+		// Remove expanded stack properties, remove container properties, remove fill.
+		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill);
   
 	return {cellStyles};
 };

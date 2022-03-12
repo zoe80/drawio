@@ -336,7 +336,8 @@ const ibmIcons = loadIBMIcons();
 					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.defaultHeight;
 				}
 
-				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
+				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
+							ibmConfig.ibmSystemProperties.transparentFill;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
@@ -361,6 +362,8 @@ const ibmIcons = loadIBMIcons();
 
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
+				else
+					systemProperties += ibmConfig.ibmSystemProperties.transparentFill;
 			}
 			else { //if (shapeLayout.startsWith('item')) {
 				//shapeHeight = 16;
