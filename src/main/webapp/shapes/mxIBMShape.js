@@ -253,36 +253,36 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
 }
 
 // Get properties corresponding to value and convert to styles.
-mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, changedLayout, hideIcon)
+mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIcon)
 {
 	let properties = '';
 	let styles = {};
 
 	// Prevent invalid changes.
 	
-	if (shapeType.startsWith('group') && changedLayout === 'collapsed')
+	if (shapeType.startsWith('group') && shapeLayout === 'collapsed')
 	{
-		changedLayout = 'expanded';
+		shapeLayout = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
-	else if (shapeType === 'actor' && changedLayout.startsWith('expanded'))
+	else if (shapeType === 'actor' && shapeLayout.startsWith('expanded'))
 	{
-		changedLayout = 'collapsed';
+		shapeLayout = 'collapsed';
 		properties = 'ibmLayout=collapsed;';
 	}
-	else if (shapeType === 'target' && changedLayout === 'expandedStack')
+	else if (shapeType === 'target' && shapeLayout === 'expandedStack')
 	{
-		changedLayout = 'expanded';
+		shapeLayout = 'expanded';
 		properties = 'ibmLayout=expanded;';
 	}
 
 	// Get shape-specific properties.
 	
-	if (changedLayout === "collapsed")
+	if (shapeLayout === "collapsed")
 		// Add collapsed text properties, remove expanded stack properties, remove container properties, remove fill.
 		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
 				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
-	else if (changedLayout === "expanded")
+	else if (shapeLayout === "expanded")
 	{
 		if (shapeType === 'target')
 		{
@@ -300,11 +300,11 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, change
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
 						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 	}
-	else if (changedLayout === "expandedStack")
+	else if (shapeLayout === "expandedStack")
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
 		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
 				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
-	else if (changedLayout.startsWith('item'))
+	else if (shapeLayout.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
 		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
 				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
@@ -331,9 +331,9 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, change
 	return styles;
 }
 
-mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, changedLayout, hideIcon)
+mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, hideIcon)
 {
-	let styles = this.getCellStyles(shapeType, shapeLayout, changedLayout, hideIcon);
+	let styles = this.getCellStyles(shapeType, shapeLayout, hideIcon);
 
 	for (let key in styles) 
 		style = mxUtils.setStyle(style, key, styles[key]);
@@ -722,7 +722,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 								          (currentLayout == 'collapsed' && previousLayout != 'collapsed') ||
 									  (hideIcon.current != hideIcon.previous));
 							var styleNew = style.current;
-							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, (changeLayout ? currentLayout : null), (hideIcon.current == 1), iconImage);
+							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, changeLayout, (hideIcon.current == 1), iconImage);
 							styleNew = updatedStyle.style;
 							shapeLayout.current = updatedStyle.shapeLayout;
 							needApplyStyle = style.current !== styleNew;
@@ -1370,15 +1370,15 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 };
 
 var shapeStyle = {};
-mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, changedLayout, hideIcon, iconImage)
+mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, layoutChanged, hideIcon, iconImage)
 {	
 	if (iconImage)
 	{
 		style = mxUtils.setStyle(style, 'shape', mxIBMShapeBase.prototype.cst.SHAPE);
 	}
 
-	if (changedLayout != null)
-		style = this.setCellStyles(style, shapeType, shapeLayout, changedLayout, hideIcon);
+	if (layoutChange)
+		style = this.setCellStyles(style, shapeType, shapeLayout, hideIcon);
 
 	return {style, shapeLayout};
 }

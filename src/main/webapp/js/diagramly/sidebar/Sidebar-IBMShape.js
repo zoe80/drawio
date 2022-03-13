@@ -362,10 +362,16 @@ const ibmIcons = loadIBMIcons();
 					systemProperties += ibmConfig.ibmSystemProperties.expandedStack;
 
 				if (!shapeFill)
-					systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+				{
+					if (shapeContainer)
+						systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+					else
+						systemProperties += ibmConfig.ibmSystemProperties.noFill;
+				}
 
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
+
 			}
 			else { //if (shapeLayout.startsWith('item')) {
 				//shapeHeight = 16;
