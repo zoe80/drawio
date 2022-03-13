@@ -1377,7 +1377,7 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, layo
 		style = mxUtils.setStyle(style, 'shape', mxIBMShapeBase.prototype.cst.SHAPE);
 	}
 
-	if (layoutChange)
+	if (layoutChanged)
 		style = this.setCellStyles(style, shapeType, shapeLayout, hideIcon);
 
 	return {style, shapeLayout};
