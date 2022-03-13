@@ -333,7 +333,7 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 
 mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, hideIcon)
 {
-	let styles = this.getCellStyles(shapeType, shapeLayout, hideIcon);
+	let styles = mxIBMShapeBase.prototype.getCellStyles(shapeType, shapeLayout, hideIcon);
 
 	for (let key in styles) 
 		style = mxUtils.setStyle(style, key, styles[key]);
@@ -1378,7 +1378,7 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, layo
 	}
 
 	if (layoutChanged)
-		style = this.setCellStyles(style, shapeType, shapeLayout, hideIcon);
+		style = mxIBMShapeBase.prototype.setCellStyles(style, shapeType, shapeLayout, hideIcon);
 
 	return {style, shapeLayout};
 }
