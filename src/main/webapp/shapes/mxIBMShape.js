@@ -154,8 +154,11 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set font color to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
-	// Normalize font color to be visible for expanded target shape type.
-	fontColor = (shapeType === 'target' && shapeLayout.startsWith('expanded')) ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
+	// Normalize font color to be visible for expanded target shapes.
+	fontColor = (shapeType === 'target' && shapeLayout === 'expanded') ? this.normalizeFontColor(fontColor, iconAreaColor) : fontColor;
+
+	// Normalize font color to be visible for collapsed shapes after expanded target shape.
+	fontColor = (shapeType === 'target' && shapeLayout === 'collapsed') ? ibmConfig.ibmColors.black : fontColor;
 
 	// Set badge color to line color if not set otherwise use badge color.
 	badgeColor = (badgeColor === this.cst.BADGE_COLOR_DEFAULT) ? lineColor : this.rgb2hex(badgeColor);
