@@ -306,7 +306,8 @@ const ibmIcons = loadIBMIcons();
 			if (noShapeHeader)
 				systemProperties += ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties[shapeType + "StackNoHeader"];
 			else
-				systemProperties += ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties[shapeType + "Stack"];
+				systemProperties += ibmConfig.ibmSystemProperties.legendStack + ibmConfig.ibmSystemProperties[shapeType + "Stack"] +
+							ibmConfig.ibmSystemProperties.legendLabel;
 
 			if (shapeContainer)
 				systemProperties += ibmConfig.ibmSystemProperties.container;
@@ -337,7 +338,7 @@ const ibmIcons = loadIBMIcons();
 				}
 
 				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
-							ibmConfig.ibmSystemProperties.transparentFill;
+							ibmConfig.ibmSystemProperties.noFill;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
@@ -355,15 +356,16 @@ const ibmIcons = loadIBMIcons();
 					shapeHeight = ibmConfig.ibmShapeSizes.expanded.defaultHeight;
 				}
 
-				if (shapeLayout === 'expanded')
-					systemProperties += ibmConfig.ibmSystemProperties.expandedLabel;
-				else // expandedStack
-					systemProperties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack;
+				systemProperties += ibmConfig.ibmSystemProperties.expandedLabel;
+
+				if (shapeLayout === 'expandedStack')
+					systemProperties += ibmConfig.ibmSystemProperties.expandedStack;
+
+				if (!shapeFill)
+					systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
 
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
-				else
-					systemProperties += ibmConfig.ibmSystemProperties.transparentFill;
 			}
 			else { //if (shapeLayout.startsWith('item')) {
 				//shapeHeight = 16;

@@ -252,26 +252,66 @@ mxIBMShapeBase.prototype.getDetails = function(shape, shapeType, shapeLayout, sh
         return details;
 }
 
-// Get properties corresponding to shape layout and convert to styles.
-mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
+// Get properties corresponding to value and convert to styles.
+mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, changedLayout, hideIcon)
 {
 	let properties = '';
 	let styles = {};
 
+	// Prevent invalid changes.
+	
+	if (shapeType.startsWith('group') && changedLayout === 'collapsed')
+	{
+		changedLayout = 'expanded';
+		properties = 'ibmLayout=expanded;';
+	}
+	else if (shapeType === 'actor' && changedLayout.startsWith('expanded'))
+	{
+		changedLayout = 'collapsed';
+		properties = 'ibmLayout=collapsed;';
+	}
+	else if (shapeType === 'target' && changedLayout === 'expandedStack')
+	{
+		changedLayout = 'expanded';
+		properties = 'ibmLayout=expanded;';
+	}
+
 	// Get shape-specific properties.
 	
-	if (shapeLayout === "collapsed")
-		// Add collapsed text properties and remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill;
-	else if (shapeLayout === "expanded")
-		// Add expanded text and container properties and remove expanded stack properties.
-		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
-	else if (shapeLayout === "expandedStack")
-		// Add expanded text, expanded stack properties, and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
+	if (changedLayout === "collapsed")
+		// Add collapsed text properties, remove expanded stack properties, remove container properties, remove fill.
+		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
+				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
+	else if (changedLayout === "expanded")
+	{
+		if (shapeType === 'target')
+		{
+			// Add expanded label properties, remove container properties, remove expanded stack properties, add default fill.
+			if (hideIcon) 
+				properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon; 
+			else
+				properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
+
+			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull + 
+					ibmConfig.ibmSystemProperties.defaultFill;
+		}
+		else
+			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
+			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
+						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
+	}
+	else if (changedLayout === "expandedStack")
+		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
+		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
+				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
+	else if (changedLayout.startsWith('item'))
+		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
+		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
+				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 	else
-		// Remove expanded stack and container properties.
-		properties = ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.defaultFill;
+		// Remove expanded stack properties, remove container properties, remove fill.
+		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
+				ibmConfig.ibmSystemProperties.defaultFill;
 
 	// Convert properties to a style dictionary.
 	
@@ -291,14 +331,14 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeLayout)
 	return styles;
 }
 
-// Set cell styles.
-mxIBMShapeBase.prototype.setCellStyles = function(graph, shapeType)
+mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, changedLayout, hideIcon)
 {
-	let cells = graph.getSelectionCells();
-	let styles = this.getCellStyles(shapeType);
+	let styles = this.getCellStyles(shapeType, shapeLayout, changedLayout, hideIcon);
 
-	for (let key in styles)
-		graph.setCellStyles(key, styles[key], cells);
+	for (let key in styles) 
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
 };
 
 // Return switch icon if switching between logical to prescribed or prescribed to logical.
@@ -437,35 +477,18 @@ mxIBMShapeBase.prototype.getDimensions = function(shape, shapeType, shapeLayout,
 		details['styleColor']  = colors.styleColor;
 	}
 
-                //return {
-                //        minWidth, minHeight, defaultWidth,
-                //        shapeWidth, shapeHeight, curveRadius, shapeAlign,
-                //        iconAreaWidth, sidebarWidth, sidebarHeight,
-                //        labelHeight, labelAlign,
-                //        sidetickWidth, sidetickHeight, sidetickLeftStart,
-                //        multiplicityOffset, doubleOffset,
-                //        iconSize, iconSpacing
-                //};
-			
-		return details;
+	return details;
 }
 
 mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 {
 	let shapeLayout = shape.shapeLayout;
-	//let shapeSubLayout = shape.shapeSubLayout;
 
-	//let shapeType = ((shapeLayout == 'item' && shapeSubLayout != 'Shape' && shapeSubLayout != 'Icon') ? 
-	//		'itemBase' : shape.shapeType);
 	let shapeType = shape.shapeType;
 
-	//let shapeVisible = (shapeLayout === 'expanded' || shapeLayout === 'collapsed' || (shapeLayout === 'item' && (shapeSubLayout != 'Badge' && shapeSubLayout != 'Icon')));
 	let shapeVisible = (shapeLayout.startsWith('expanded') || shapeLayout === 'collapsed' || (shapeLayout.startsWith('item') && (shapeLayout !== 'itemBadge' && shapeLayout != 'itemIcon')));
 
-	//let iconVisible = ((shapeLayout === 'expanded' || shapeLayout === 'collapsed' || (shapeLayout === 'legend' && shapeSubLayout === 'icon')) && mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.ICON_VISIBLE, mxIBMShapeBase.prototype.cst.ICON_VISIBLE_DEFAULT));
-	//let hideIcon = (shapeLayout === 'legend' && shapeSubLayout !== 'icon') && !mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
 	let hideIcon = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
-	//if (shapeLayout === 'item' && shapeSubLayout !== 'Icon') hideIcon = true;
 	if (shapeLayout.startsWith('item') && shapeLayout !== 'itemIcon') hideIcon = true;
 
 	let rotateIcon = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.ROTATE_ICON, mxIBMShapeBase.prototype.cst.ROTATE_ICON_DEFAULT);
@@ -475,7 +498,6 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let styleStrikethrough = shape.styleStrikethrough;
 	let styleMultiplicity = shape.styleMultiplicity;
 
-	//if ((shapeType  === 'itemBase' || shapeSubLayout === 'Shape') && (shapeSubLayout === 'Color' || shapeSubLayout === 'Shape'))
 	if (shapeLayout === 'itemColor' || shapeLayout === 'itemShape')
 	{
 		styleDashed = false;
@@ -487,8 +509,6 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	//SAVE let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, width, height);
 	let details = mxIBMShapeBase.prototype.getDimensions(shape, shapeType, shapeLayout, width, height);
 
-	//let colors = this.getColors(shape);
-
 	let lineColor = details.lineColor;
 	let fillColor = details.fillColor;
 	let fontColor = details.fontColor;
@@ -496,89 +516,50 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	let badgeFontColor = details.badgeFontColor;
 	let iconColor = details.iconColor;
 
-	//let cornerColor = shapeType.startsWith('group') ? 'none' : details.iconAreaColor;
 	let cornerColor = details.iconAreaColor;
 	let styleColor = details.styleColor;
 
 	let secondLine = styleDouble;
 
-	//let cornerVisible = shapeVisible && (!hideIcon || cornerColor != 'none');
 	let cornerVisible = shapeVisible && (!hideIcon || cornerColor != 'none');
 	if (cornerVisible)
 	{
-		//if (hideIcon && (shapeLayout.startsWith('expanded') || shapeLayout.startsWith('item')))
 		if (hideIcon && ((shapeLayout.startsWith('expanded') && shapeType != 'target') || shapeLayout.startsWith('item')))
 			cornerVisible = false;
 		else if (shapeLayout.startsWith('item'))
 			cornerVisible = false;
 	}
 
-	//let details = mxIBMShapeBase.prototype.getDetails(shape, shapeType, shapeLayout, height, width);
-
 	let iconAreaWidth = (cornerVisible) ? details.iconAreaWidth : 0;
-	//let cornerHeight = details.minHeight;
 	let cornerHeight = details.iconAreaHeight;
 
-	//let barVisible = (shapeType === 'pg' || shapeType === 'lg');
 	let barVisible = shapeType.startsWith('group');
 	let sidebarWidth = details.sidebarWidth;
 	let sidebarHeight = details.sidebarHeight;
 
-	//let tickVisible = (shapeType === 'lc' || shapeType === 'pc');
 	let tickVisible = shapeType.startsWith('comp');
 	let sidetickWidth = details.sidetickWidth;
 	let sidetickHeight = details.sidetickHeight;
 	let sidetickLeftStart = details.sidetickLeftStart;
 
 	let badge = mxUtils.getValue(shape.state.style, mxIBMShapeBase.prototype.cst.BADGE, mxIBMShapeBase.prototype.cst.BADGE_DEFAULT);
-	//let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout === 'expanded' || (shapeLayout === 'item' && shapeSubLayout === 'Badge'));
 	let badgeVisible = (badge != 'none') && (shapeLayout === 'collapsed' || shapeLayout.startsWith('expanded') || shapeLayout === 'itemBadge');
 	let badgeText = badgeVisible ? shape.state.cell.getAttribute('Badge-Text', null) : null;
-
-	//SAVE badgeFontColor = this.normalizeFontColor(ibmConfig.ibmColors.black, badgeColor);
-
-	//SAVE iconColor = this.normalizeFontColor(ibmConfig.ibmColors.black, cornerColor);
 
 	if (shapeLayout === 'itemColor' || shapeLayout === 'itemShape')
 	{
 		secondLine = false;
-		//SAVEif (shapeLayout === 'itemColor')
-		//SAVE	fillColor = lineColor;  // Line fill color legend.
 	}
 
 	if (shapeLayout === 'collapsed' || shapeLayout.startsWith('item'))
 	{
-		//styleColor = this.isDarkColor(cornerColor) ? ibmConfig.ibmColors.white : lineColor;
-		/*SAVE
-		if (shapeLayout === 'itemStyle')
-			styleColor = lineColor;
-		else
-			styleColor = this.normalizeFontColor(styleColor, cornerColor);
-		*/
-
-		//SAVE if (shapeLayout === 'itemIcon')
-		//SAVE	iconColor = ibmConfig.ibmColors.black;
-
 		if (styleDashed)
-			//secondLine = this.isDarkColor(cornerColor);
 			secondLine = true;
 	}
 	else if (shapeLayout.startsWith('expanded'))
 	{
-		//fontColor = (shapeType === 'target' && this.isDarkColor(cornerColor)) ?  ibmConfig.ibmColors.white : fontColor;  // ibmConfig.ibmColors.black;
-
 		if (shapeType === 'target')
 		{
-			//SAVE fontColor = this.normalizeFontColor(fontColor, cornerColor);
-
-			/*SAVE
-			if (styleStrikethrough)
-				//styleColor = this.isDarkColor(cornerColor) ?  ibmConfig.ibmColors.white : lineColor;
-				styleColor = this.normalizeFontColor(styleColor, cornerColor);
-			else if (styleDashed)
-				//secondLine = this.isDarkColor(cornerColor);
-				secondLine = false;
-			*/
 			if (styleDashed)
 				secondLine = false;
 		}
@@ -605,7 +586,6 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	return {
 		'shapeType': shapeType,
 		'shapeLayout': shapeLayout,
-		//'shapeSubLayout': shapeSubLayout,
 		'shapeVisible': shapeVisible,
 
 		'hideIcon': hideIcon,
@@ -621,12 +601,10 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 		'labelHeight': labelHeight,
 
 		'barVisible': barVisible,
-		//'barColor': barColor,
 		'sidebarWidth': sidebarWidth,
 		'sidebarHeight': sidebarHeight,
 
 		'tickVisible': tickVisible,
-		//'tickColor': tickColor,
 		'sidetickWidth': sidetickWidth,
 		'sidetickHeight': sidetickHeight,
 		'sidetickLeftStart': sidetickLeftStart,
@@ -660,58 +638,6 @@ mxIBMShapeBase.prototype.getProperties = function(shape, width, height)
 	};
 };
 
-mxIBMShapeBase.prototype.getCellStyles2 = function(cellProps)
-{
-	let cellStyles = {};
-
-	let props = cellProps.split(';');
-	props = props.slice(0, -1); // Remove trailing semicolon.
-
-	for (var index = 0; index < props.length; index++)
-	{
-		cell = props[index].split('=');
-		if (cell[1] === 'null')
-			cellStyles[cell[0]] = null;
-		else	
-			cellStyles[cell[0]] = cell[1];
-	}
-
-	return cellStyles;
-}
-
-mxIBMShapeBase.prototype.getCellLayout = function(value)
-{
-	let cellStyles = {};
-
-	if (value === "collapsed")
-		// Add collapsed text properties, remove expanded stack properties remove container properties, remove fill.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill);
-	else if (value === "expanded")
-		// Add expanded text properties, add container properties, remove expanded stack properties, add default fill.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill);
-	else if (value === "expandedStack")
-		// Add expanded text properties, add expanded stack properties, add container properties, add default fill.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill);
-	else if (value.startsWith("group"))
-		// Add expanded texti properties , add container properties, remove expanded stack properties, add default fill.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill);
-	else
-		// Remove expanded stack properties, remove container properties, remove fill.
-		cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.transparentFill);
-  
-	return {cellStyles};
-};
-
-mxIBMShapeBase.prototype.setCellStyles2 = function(graph, change) 
-{
-	let stylesForCells = this.getCellLayout(change).cellStyles;  
-
-	let selectedCells = graph.getSelectionCells();
-
-	for (let key in stylesForCells) 
-		graph.setCellStyles(key, stylesForCells[key], selectedCells);
-};
-
 mxIBMShapeBase.prototype.textSpacing = 4;
 
 mxIBMShapeBase.prototype.textSpacingLeft = 16;
@@ -723,12 +649,7 @@ mxIBMShapeBase.prototype.init = function(container)
 		obj.setAttribute('label', this.state.cell.value);
 		this.state.cell.value = obj;
 	}
-	//else {
-	//	let obj = mxUtils.createXmlDocument().createElement('UserObject');
-	//	obj.setAttribute('label', ibmConfig.ibmFontProperties.en);
-	//	this.state.cell.value = obj;
-	//}
-
+	
 	let ibmShapeAttributes = ['Badge-Text', 'Icon-Name', 'Primary-Label', 'Secondary-Text'];
 	this.addMissingAttribute(this.state.cell, ibmShapeAttributes);
 
@@ -786,42 +707,25 @@ mxIBMShapeBase.prototype.handleEvents = function()
 						const shapeType = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE);
 						const hideIcon = valueStatus(style, mxIBMShapeBase.prototype.cst.HIDE_ICON);
 
-						//const shapeLayoutValues = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT);
 						const shapeLayout = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT);
-						//const shapeCurrLayoutValues = mxIBMShapeBase.prototype.extractLayouts(shapeLayoutValues.current);
-						//const shapePrevLayoutValues = mxIBMShapeBase.prototype.extractLayouts(shapeLayoutValues.previous);
-						//const shapeLayout = { current: shapeCurrLayoutValues[0], previous: shapePrevLayoutValues[0], isChanged: shapeCurrLayoutValues[0] !== shapePrevLayoutValues[0]};
-						//const shapeSubLayout = { current: shapeCurrLayoutValues[1], previous: shapePrevLayoutValues[1], isChanged: shapeCurrLayoutValues[1] !== shapePrevLayoutValues[1] };
 						
-						//var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || shapeSubLayout.isChanged;
 						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || iconImage;
 
 						if (needApplyStyle)
 						{
 							// Replaces onChange.
-							//var currentLayout = shapeLayout.current + shapeSubLayout.current;
-							//currentLayout = currentLayout.toLowerCase();
 							var currentLayout = shapeLayout.current;
-							//var previousLayout = shapeLayout.previous + shapeSubLayout.previous;
-							//previousLayout = previousLayout.toLowerCase();
 							var previousLayout = shapeLayout.previous;
-							//changeExpanded = ((currentLayout == 'expanded' && previousLayout == 'expandedstack') || (currentLayout == 'expandedstack' && previousLayout == 'expanded') || (currentLayout.startsWith('expanded') && (previousLayout == 'collapsed' || previousLayout.startsWith('item'))));
-							changeExpanded = ((currentLayout == 'expanded' && previousLayout == 'expandedStack') || 
+							changeLayout = ((currentLayout == 'expanded' && previousLayout == 'expandedStack') || 
 									  (currentLayout == 'expandedStack' && previousLayout == 'expanded') || 
 									  (currentLayout.startsWith('expanded') && (previousLayout == 'collapsed' || previousLayout.startsWith('item'))) || 
-								          (currentLayout == 'collapsed' && previousLayout != 'collapsed'));
+								          (currentLayout == 'collapsed' && previousLayout != 'collapsed') ||
+									  (hideIcon.current != hideIcon.previous));
 							var styleNew = style.current;
-							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, hideIcon.current, iconImage, (changeExpanded ? currentLayout : null) );
+							var updatedStyle = mxIBMShapeBase.prototype.getStyle(styleNew, shapeType.current, shapeLayout.current, (changeLayout ? currentLayout : null), (hideIcon.current == 1), iconImage);
 							styleNew = updatedStyle.style;
 							shapeLayout.current = updatedStyle.shapeLayout;
 							needApplyStyle = style.current !== styleNew;
-
-							if (shapeType.isChanged)
-							{
-								const needDraw = false;
-								if (needDraw)
-									this.redraw();
-							}
 						}
 						
 						var needApplyGeo = shapeType.isChanged || shapeLayout.isChanged;
@@ -831,7 +735,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							var newRect = mxIBMShapeBase.prototype.getRectangle(
 								false,
 								new mxRectangle(geoCurrent.x, geoCurrent.y, geoCurrent.width, geoCurrent.height), 
-									shapeType.current, shapeLayout.current /*, shapeSubLayout.current*/);
+									shapeType.current, shapeLayout.current);
 					
 							needApplyGeo = geoCurrent.width != newRect.width || geoCurrent.height != newRect.height;
 						}
@@ -911,9 +815,6 @@ mxIBMShapeBase.prototype.redraw = function()
 {
 	this.shapeType = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);	
 	
-	//let shapeLayoutValues = mxIBMShapeBase.prototype.extractLayouts(mxUtils.getValue(this.style,mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT));
-	//this.shapeLayout = shapeLayoutValues[0];
-	//this.shapeSubLayout = shapeLayoutValues[1];
 	this.shapeLayout = mxUtils.getValue(this.style,mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);
 
 	this.styleDashed = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.STYLE_DASHED, mxIBMShapeBase.prototype.cst.STYLE_DASHED_DEFAULT);
@@ -921,23 +822,12 @@ mxIBMShapeBase.prototype.redraw = function()
 	this.styleStrikethrough = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH_DEFAULT);
 	this.styleMultiplicity = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.STYLE_MULTIPLICITY, mxIBMShapeBase.prototype.cst.STYLE_MULTIPLICITY_DEFAULT);
 
-	//this.iconVisible = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.ICON_VISIBLE, mxIBMShapeBase.prototype.cst.ICON_VISIBLE_DEFAULT);
 	this.hideIcon = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.HIDE_ICON, mxIBMShapeBase.prototype.cst.HIDE_ICON_DEFAULT);
 	this.rotateIcon = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.ROTATE_ICON, mxIBMShapeBase.prototype.cst.ROTATE_ICON_DEFAULT);
 
 	this.lineColor = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.LINE_COLOR, mxIBMShapeBase.prototype.cst.LINE_COLOR_DEFAULT);	
 	this.fillColor = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);	
 	this.fontColor = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.FONT_COLOR, mxIBMShapeBase.prototype.cst.FONT_COLOR_DEFAULT);	
-
-	/*
-	if (this.fillColor != this.cst.FILL_COLOR_DEFAULT) {
-		let normalizedColor = this.normalizeFillColor(this.fillColor, this.lineColor);
-		styleCurrent = this.state.view.graph.model.getStyle(this.state.cell);
-		newStyle = mxUtils.setStyle(styleCurrent, mxIBMShapeBase.prototype.cst.FILL_COLOR, normalizedColor);
-		this.state.view.graph.model.setStyle(this.state.cell, newStyle);
-		this.fillColor = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.FILL_COLOR, mxIBMShapeBase.prototype.cst.FILL_COLOR_DEFAULT);	
-	}
-	*/
 
 	// labelPosition and verticalLabelPosition required here to change shape from collapsed to expanded.
 	this.labelPosition = mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.LABEL_POSITION, mxIBMShapeBase.prototype.cst.LABEL_POSITION_DEFAULT);
@@ -948,7 +838,6 @@ mxIBMShapeBase.prototype.redraw = function()
 
 mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 {
-	//let pop = this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
 	this.shapeProperties = mxIBMShapeBase.prototype.getProperties(this, w, h);
 
 	c.translate(x, y);
@@ -960,23 +849,10 @@ mxIBMShapeBase.prototype.paintVertexShape = function(c, x, y, w, h)
 	this.paintStrikethrough(c);
 	this.paintBadge(c);
 
-	//this.style.fontColor = pop.fontColor;
 	this.style.fontColor = this.shapeProperties.fontColor;
 	styleCurrent = this.state.view.graph.model.getStyle(this.state.cell);
 	newStyle = mxUtils.setStyle(styleCurrent, 'fontColor', this.style.fontColor);
 	this.state.view.graph.model.setStyle(this.state.cell, newStyle);
-
-	//if (!mxUtils.isNode(this.state.cell.value)) {
-	//let obj = mxUtils.createXmlDocument().createElement('UserObject');
-	//obj.setAttribute('label', ibmConfig.ibmFontProperties.en);
-	//obj.setAttribute('label', this.state.cell.value);
-	//this.state.cell.value = obj;
-	//}
-
-	//this.style.fontColor = pop.fontColor;
-	//styleCurrent = this.state.view.graph.model.getStyle(this.state.cell);
-	//newStyle = mxUtils.setStyle(styleCurrent, 'fontColor', this.style.fontColor);
-	//this.state.view.graph.model.setStyle(this.state.cell, newStyle);
 };
 
 mxIBMShapeBase.prototype.paintActor = function(c, width, offSet = 0)
@@ -1030,12 +906,10 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 		{
 			mxIBMShapeBase.prototype.paintActor(c, pop.shapeWidth, doubleStyleOffset);
 		}
-		//else if (pop.shapeType === 'ts')
 		else if (pop.shapeType === 'target')
 		{
 			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.curveRadius, doubleStyleOffset, pop.shapeAlign);
 		}
-		//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 		else if (pop.shapeType === 'nodel' || pop.shapeType === 'compl')
 		{
 			if (pop.shapeLayout === 'collapsed' || pop.shapeLayout.startsWith('item'))
@@ -1075,7 +949,6 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 {
 	let pop = this.shapeProperties;
 
-	//if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 	if (pop.shapeType.slice(-1) === 'l')
 	{
 		if (pop.sidebarHeight < pop.shapeHeight)
@@ -1098,7 +971,6 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 			c.fill();
 		}
 	}
-	//else if (pop.shapeType === 'lg')
 	else if (pop.shapeType === 'groupl')
 	{
 		c.begin();
@@ -1181,13 +1053,10 @@ mxIBMShapeBase.prototype.paintShapeOutline = function(c, doubleStyleOffset)
 
 	if (pop.shapeType === 'actor')
 		mxIBMShapeBase.prototype.paintActor(c, pop.shapeWidth, doubleStyleOffset);
-	//else if (pop.shapeType === 'ts')
 	else if (pop.shapeType === 'target')
 		mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset, pop.shapeAlign);
-	//else if (pop.shapeType === 'ln' || pop.shapeType === 'lc')
 	else if (pop.shapeType.slice(-1)  === 'l')
 		mxIBMShapeBase.prototype.paintRoundedRectangle(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
-	//else if (pop.shapeType === 'lg')
 	else if (pop.shapeType === 'groupl')
 		mxIBMShapeBase.prototype.paintLogicalGroup(c, pop.shapeWidth, pop.shapeHeight, pop.curveRadius, doubleStyleOffset);
 	else
@@ -1226,7 +1095,6 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 			rightCornerX = getCornerX(angle, r);
 			rightCornerY = getCornerY(angle, r);
 		}
-		//else if (pop.shapeType === 'ts') {
 		else if (pop.shapeType === 'target') {
 			if (pop.shapeLayout === 'collapsed' || pop.shapeLayout.startsWith('item')) {
 				let r = pop.curveRadius;
@@ -1246,7 +1114,6 @@ mxIBMShapeBase.prototype.paintStrikethrough = function(c)
 			}
 
 		}
-		//else if (-1 !== ['ln', 'lc', 'lg'].indexOf(pop.shapeType)) {
 		else if (pop.shapeType.slice(-1) === 'l') {
 			let r = pop.curveRadius;
 			let angle = 135;
@@ -1329,7 +1196,6 @@ mxIBMShapeBase.prototype.paintBadge = function(c)
 		
 		let rightBadgeX = 0;
 
-		//let badgeOffset = (pop.shapeType === 'actor' || pop.shapeType === 'ts') ? -8 : 0;
 		let badgeOffset = (pop.shapeType === 'actor' || pop.shapeType === 'target') ? -8 : 0;
 		const badgeSpaceRight = -1 * badgeHeight / 2 - badgeOffset;
 		if (pop.shapeLayout.startsWith('item')) {
@@ -1411,7 +1277,6 @@ mxIBMShapeBase.prototype.paintShapeMultiplicity = function(c) {
 
 		c.begin();
 		for (let idx = 0; idx < numbers.length; idx++) {
-			//if (-1 !== ['ln', 'lc', 'lg'].indexOf(pop.shapeType)) {
 			if (pop.shapeType.slice(-1) === 'l') {
 				c.moveTo((numbers[idx] + 1) * space, -numbers[idx] * space);
 				c.lineTo(width + numbers[idx] * space - radius, -numbers[idx] * space);
@@ -1422,7 +1287,6 @@ mxIBMShapeBase.prototype.paintShapeMultiplicity = function(c) {
 				c.moveTo(width / 2 + numbers[idx] * space, -numbers[idx] * space);
 				c.arcTo(radius, radius, 0, 0, 1, width + numbers[idx] * space, height / 2 - numbers[idx] * space);
 			}
-			//else if (pop.shapeType === 'ts') {
 			else if (pop.shapeType === 'target') {
 				c.moveTo(radius + offset + (numbers[idx] - 1) * space, -numbers[idx] * space);
 				c.lineTo(width + offset - radius + numbers[idx] * space, -numbers[idx] * space);
@@ -1444,9 +1308,7 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 
 	if (!pop.hideIcon)
 	{
-		//let positionX = (pop.shapeType === 'lg' || pop.shapeType  === 'pg') ? pop.iconAreaWidth - pop.iconSize : pop.iconAreaWidth/2 - pop.iconSize/2;
 		let positionX = pop.shapeType.startsWith('group') ? pop.iconAreaWidth - pop.iconSize : pop.iconAreaWidth/2 - pop.iconSize/2;
-		//positionX = (pop.shapeLayout === 'expanded' && pop.shapeType  === 'ts') ? positionX + pop.curveRadius/2 : positionX;
 		positionX = (pop.shapeLayout.startsWith('expanded') && pop.shapeType  === 'target') ? positionX + pop.curveRadius/2 : positionX;
 		positionX = (pop.shapeLayout.startsWith('item')) ? 0 : positionX;
 		
@@ -1508,122 +1370,20 @@ mxIBMShapeBase.prototype.paintIcon = function(c)
 };
 
 var shapeStyle = {};
-mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, hideIcon, iconImage, changeExpanded)
+mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, changedLayout, hideIcon, iconImage)
 {	
 	if (iconImage)
 	{
 		style = mxUtils.setStyle(style, 'shape', mxIBMShapeBase.prototype.cst.SHAPE);
 	}
 
-	if (changeExpanded != null)
-	{
-		let stylesForCells = this.getCellLayout(changeExpanded).cellStyles;  
-
-		for (let key in stylesForCells) 
-			style = mxUtils.setStyle(style, key, stylesForCells[key]);
-	}
-
-	//if (shapeType === 'pg' || shapeType === 'lg')
-	if (shapeType.startsWith('group'))
-	{
-		//style = mxUtils.setStyle(style, 'container', 1);
-		//style = mxUtils.setStyle(style, 'collapsible', 0);
-		//style = mxUtils.setStyle(style, 'recursiveResize', 0);
-		//style = mxUtils.setStyle(style, 'expand', 0);
-
-		if (shapeLayout === 'collapsed')
-		{
-			shapeLayout = 'expanded';
-			style = mxUtils.setStyle(style, 'ibmLayout', shapeLayout);
-		}	
-	}
-	else if (shapeType === 'actor')
-	{
-		if (shapeLayout.startsWith('expanded'))
-		{
-			shapeLayout = 'collapsed';
-			style = mxUtils.setStyle(style, 'ibmLayout', shapeLayout);
-		}	
-	}
-
-	//if (shapeLayout === 'collapsed'|| shapeLayout === 'item')
-	//{
-	//	style = mxUtils.setStyle(style, 'container', 0);
-	//}
-
-	if (shapeLayout === 'collapsed')
-	{
-		//shapeStyle.verticalLabelPosition = mxConstants.ALIGN_BOTTOM;
-		//shapeStyle.labelPosition = mxConstants.ALIGN_CENTER;
-		//shapeStyle.verticalAlign = mxConstants.ALIGN_TOP;
-		//shapeStyle.align = mxConstants.ALIGN_CENTER;
-		//shapeStyle.spacing = 0;
-		//shapeStyle.spacingLeft = this.textSpacingLeft;
-		//shapeStyle.spacingRight = this.textSpacingLeft;
-		//shapeStyle.spacingTop = 0;
-		//shapeStyle.spacingBottom = this.textSpacing;
-
-		// Default label to bottom which can be repositioned by user.
-		let cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.collapsedLabel);
-
-		for (let key in cellStyles) 
-			style = mxUtils.setStyle(style, key, cellStyles[key]);
-	}
-	else if (shapeLayout.startsWith('expanded'))
-	{
-		//let spacingLeft = (shapeLayout === 'expanded') ? this.textSpacingLeft : 0;
-		//let spacingRight = (shapeLayout === 'expanded' && shapeType === 'target' && hideIcon) ? 16 : spacingLeft;
-		//let align = (shapeLayout === 'expanded' && shapeType === 'target' && hideIcon) ? mxConstants.ALIGN_CENTER : mxConstants.ALIGN_LEFT;
-
-		//shapeStyle.verticalLabelPosition = mxConstants.ALIGN_MIDDLE;
-		//shapeStyle.labelPosition = mxConstants.ALIGN_CENTER;
-		//shapeStyle.verticalAlign = mxConstants.ALIGN_MIDDLE;
-		//shapeStyle.align = align;
-		//shapeStyle.spacingLeft = spacingLeft;
-		//shapeStyle.spacingRight = spacingRight;			
-		//shapeStyle.spacing = 0;
-		//shapeStyle.spacingTop = 0;
-		//shapeStyle.spacingBottom = 0;
-		//style = mxUtils.setStyle(style, mxConstants.STYLE_LABEL_WIDTH, null); // remove the label width since this is controlled by the bounding box
-		
-		let cellStyles = {};
-
-		if (shapeType === 'target')
-		{
-			if (hideIcon) 
-				cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon);
-			else
-				cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedTargetLabel);
-		}
-		else
-			cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.expandedLabel);
-
-		for (let key in cellStyles) 
-			style = mxUtils.setStyle(style, key, cellStyles[key]);
-	}
-	else if (shapeLayout.startsWith('item'))
-	{
-		let cellStyles = this.getCellStyles2(ibmConfig.ibmSystemProperties.itemLabel);
-
-		for (let key in cellStyles) 
-			style = mxUtils.setStyle(style, key, cellStyles[key]);
-	}
-
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_VERTICAL_LABEL_POSITION, shapeStyle.verticalLabelPosition);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_LABEL_POSITION, shapeStyle.labelPosition);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_VERTICAL_ALIGN, shapeStyle.verticalAlign);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_ALIGN, shapeStyle.align);
-
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_SPACING, shapeStyle.spacing);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_SPACING_LEFT, shapeStyle.spacingLeft);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_SPACING_RIGHT, shapeStyle.spacingRight);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_SPACING_TOP, shapeStyle.spacingTop);
-	//style = mxUtils.setStyle(style, mxConstants.STYLE_SPACING_BOTTOM, shapeStyle.spacingBottom);
+	if (changedLayout != null)
+		style = this.setCellStyles(style, shapeType, shapeLayout, changedLayout, hideIcon);
 
 	return {style, shapeLayout};
 }
 
-mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, shapeLayout /*, shapeSubLayout*/)
+mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, shapeLayout)
 {
 	if (shapeType != null)
 	{
@@ -1638,7 +1398,6 @@ mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, 
 		else if (shapeLayout.startsWith('expanded'))
 		{
 			rect.width = Math.max(usingMinSize ? details.minWidth : details.defaultWidth, rect.width);
-			//height = shapeType === 'ts' ? details.minHeight : Math.max(details.minHeight, rect.height);
 			height = shapeType === 'target' ? details.minHeight : Math.max(details.minHeight, rect.height);
 		}
 
@@ -1682,8 +1441,6 @@ mxIBMShapeBase.prototype.getConstraints = function(style, w, h)
 	else
 	{
 		const connectionPositions = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9];
-		//const dXoffSet = (pop.shapeType != 'ts' && pop.styleMultiplicity) ? 8 : 0;
-		//const dYoffSet = (pop.shapeType != 'ts' && pop.styleMultiplicity) ? 8 : 0;
 		const dXoffSet = (pop.shapeType != 'target' && pop.styleMultiplicity) ? 8 : 0;
 		const dYoffSet = (pop.shapeType != 'target' && pop.styleMultiplicity) ? 8 : 0;
 		
@@ -1734,11 +1491,8 @@ mxVertexHandler.prototype.union = function(bounds, dx, dy, index, gridEnabled, s
 	if (this.state.style['shape'] === mxIBMShapeBase.prototype.cst.SHAPE)
 	{
 		const shapeType = mxUtils.getValue(this.state.style, mxIBMShapeBase.prototype.cst.SHAPE_TYPE, mxIBMShapeBase.prototype.cst.SHAPE_TYPE_DEFAULT);
-		//var shapeLayoutValues = mxIBMShapeBase.prototype.extractLayouts(mxUtils.getValue(this.state.style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT));
-		//const shapeLayout = shapeLayoutValues[0];
-		//const shapeSubLayout = shapeLayoutValues[1];
 		const shapeLayout = mxUtils.getValue(this.state.style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT_DEFAULT);
-		rect = mxIBMShapeBase.prototype.getRectangle(true, rect, shapeType, shapeLayout /*, shapeSubLayout*/);
+		rect = mxIBMShapeBase.prototype.getRectangle(true, rect, shapeType, shapeLayout);
 	}
 
 	return rect;
@@ -1768,7 +1522,7 @@ mxIBMShapeLegend.legendTitlebar = 32;
 
 mxIBMShapeLegend.prototype.cst = ibmConfig.ibmLegendConstants; 
 
-// Replace below  with the following but not working yet.
+// Replace below with the following but not working yet.
 //mxIBMShapeLegend.prototype.customProperties = ibmConfig.ibmLegendProperties;
 
 mxIBMShapeLegend.prototype.customProperties = [
@@ -1813,7 +1567,6 @@ mxIBMShapeLegend.prototype.handleEvents = function()
 						{
 							// Replaces onChange.
 							var styleNew = style.current;
-							//var updatedStyle = mxIBMShapeLegend.prototype.getStyle(styleNew, shapeType.current);
 							var updatedStyle = this.getStyle(styleNew, shapeType.current);
 							styleNew = updatedStyle.style;
 							shapeLayout.current = updatedStyle.shapeLayout;
@@ -1861,17 +1614,13 @@ mxIBMShapeLegend.prototype.destroy = function()
 
 mxIBMShapeLegend.prototype.getCellLayout = function(value)
 {
-	//let isHorizontal = ['legendh', 'legendht'].includes(value);
 	let isHorizontal = (value === 'legendh');
-	//let showTitle = [ 'legendvt', 'legendht'].includes(value);
 
 	let showTitle = ! mxUtils.getValue(this.style, mxIBMShapeBase.prototype.cst.HIDE_HEADER, mxIBMShapeBase.prototype.cst.HIDE_HEADER_DEFAULT);	
 	let marginTop = (showTitle) ? mxIBMShapeLegend.legendTitlebar : mxIBMShapeLegend.legendPadding;
   
-	//let cellStyles = {'stackFill': isHorizontal ? 0 : 1, 'horizontalStack': isHorizontal ? 1 : 0, 'noLabel': showTitle ? 0 : 1 ,'marginTop': marginTop};
 	let cellStyles = {'stackFill': isHorizontal ? 0 : 1, 'horizontalStack': isHorizontal ? 1 : 0, 'marginTop': marginTop};
    
-	//return {isHorizontal, showTitle, marginTop, cellStyles};
 	return {isHorizontal, marginTop, cellStyles};
 };
 
@@ -1964,7 +1713,6 @@ mxIBMShapeLegend.prototype.init = function(container)
 mxIBMShapeLegend.prototype.redraw = function()
 {
 	let childCells = this.state.cell.children;
-	//let legendDimensions = mxIBMShapeLegend.prototype.getSizes(childCells, mxUtils.getValue(this.style, 'ibmLayout', 'verticalTitle'));
 	let legendDimensions = mxIBMShapeLegend.prototype.getSizes(childCells, mxUtils.getValue(this.style, mxIBMShapeLegend.prototype.cst.SHAPE_TYPE, mxIBMShapeLegend.prototype.cst.SHAPE_TYPE_DEFAULT));
 	let geo = this.state.cell.geometry;
 	geo.width = legendDimensions.width;
@@ -2039,8 +1787,6 @@ mxIBMShapeLegend.prototype.getLabelBounds = function(rect)
 				rect.width -  (2* legendPadding * this.scale),
 				legendTitleHeight * this.scale);
 };
-
-
 
 
 //**********************************************************************************************************************************************************
@@ -2139,7 +1885,6 @@ mxIBMShapeUnit.prototype.paintIcon = function(c)
 		let positionX = pop.iconAlign;
 		let positionY = pop.iconAlign;
  
-		//let iconStencilName = this.shapeType.substring(2);
 		let iconStencilName = "data";
 		if (this.shapeType === "unitd")
 			iconStencilName = "data";
