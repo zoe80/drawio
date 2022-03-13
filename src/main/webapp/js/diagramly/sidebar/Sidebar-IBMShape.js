@@ -266,6 +266,7 @@ const ibmIcons = loadIBMIcons();
 
 		let fontProperty = ibmConfig.ibmFonts.fontProperty;
 		let font = ibmConfig.ibmFonts[ibmLanguage];
+		fontProperty = fontProperty.replace(/REGULAR/g, font.regular);
 		fontProperty = fontProperty.replace(/SEMIBOLD/g, font.semibold);
 		//coreProperties += ibmConfig.ibmSystemProperties.basic + ibmConfig.ibmFontProperties[ibmLanguage + 'Primary'];
 		coreProperties += ibmConfig.ibmSystemProperties.basic + fontProperty;

@@ -67,7 +67,7 @@
     "ibmFonts": {
 	"en": {"regular": "IBM Plex Sans Regular", "semibold": "IBM Plex Sans SmBld"},
 
-        "fontProperty": "fontFamily=SEMIBOLD;fontSize=14;",
+        "fontProperty": "fontFamily=REGULAR;fontSize=14;",
         "badgeLabel": "<font style='font-size: 12px' face='REGULAR'>%Badge-Text%</font>",
         "legendLabel": "<font style='font-size: 14px' face='REGULAR'>%Legend-Title%</font>",
         "itemLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>",
