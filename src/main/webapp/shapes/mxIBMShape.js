@@ -151,6 +151,9 @@ mxIBMShapeBase.prototype.getColors = function(shape, shapeType, shapeLayout)
 	// Set icon area color to fill color for collapsed shapes.
 	iconAreaColor = (shapeLayout === 'collapsed' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
 
+	// Set icon area color to fill color for expanded target shapes.
+	iconAreaColor = (shapeLayout === 'expanded' && shapeType === 'target' && fillColor != this.cst.FILL_COLOR_DEFAULT) ? fillColor : iconAreaColor;
+
 	// Set font color to black if not set otherwise use font color.
 	fontColor = (fontColor === this.cst.FONT_COLOR_DEFAULT) ? ibmConfig.ibmColors.black : this.rgb2hex(fontColor);
 
@@ -283,8 +286,10 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 	
 	if (shapeLayout === "collapsed")
 		// Add collapsed text properties, remove expanded stack properties, remove container properties, remove fill.
+		//properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
+		//		ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
-				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
+				ibmConfig.ibmSystemProperties.containerNull;
 	else if (shapeLayout === "expanded")
 	{
 		if (shapeType === 'target')
@@ -295,26 +300,34 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 			else
 				properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
 
-			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull + 
-					ibmConfig.ibmSystemProperties.defaultFill;
+			//properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull + 
+			//		ibmConfig.ibmSystemProperties.defaultFill;
+			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull;
 		}
 		else
 			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
+			//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
+			//			ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
-						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
+						ibmConfig.ibmSystemProperties.expandedStackNull;
 	}
 	else if (shapeLayout === "expandedStack")
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
+		//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
+		//		ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
-				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
+				ibmConfig.ibmSystemProperties.container;
 	else if (shapeLayout.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
+		//properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
+		//		ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
-				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
+				ibmConfig.ibmSystemProperties.expandedStackNull;
 	else
 		// Remove expanded stack properties, remove container properties, remove fill.
-		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
-				ibmConfig.ibmSystemProperties.defaultFill;
+		//properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
+		//		ibmConfig.ibmSystemProperties.defaultFill;
+		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
 
 	// Convert properties to a style dictionary.
 	
@@ -912,6 +925,9 @@ mxIBMShapeBase.prototype.paintCorner = function(c)
 		else if (pop.shapeType === 'target')
 		{
 			mxIBMShapeBase.prototype.paintTargetSystem(c, pop.shapeWidth, pop.cornerHeight, pop.curveRadius, doubleStyleOffset, pop.shapeAlign);
+			// Needed for setting target system to light fill or white fill to prevent bleeding the fill to all corners.
+			//if (pop.fillColor != 'none')
+			//	c.setFillColor(pop.fillColor);
 		}
 		else if (pop.shapeType === 'nodel' || pop.shapeType === 'compl')
 		{

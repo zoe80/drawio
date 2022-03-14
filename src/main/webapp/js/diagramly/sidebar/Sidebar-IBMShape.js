@@ -260,6 +260,10 @@ const ibmIcons = loadIBMIcons();
 
 		if (shapeFill)
 			coreProperties += "fillColor=" + ibmConfig.ibmColors[shapeFill] +';';
+		else if (shapeContainer)
+			systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+		else
+			coreProperties += ibmConfig.ibmSystemProperties.noFill;
 
 		if (shapeFont)
 			coreProperties += "fontColor=" + ibmConfig.ibmColors[shapeFont] + ';';
@@ -338,8 +342,9 @@ const ibmIcons = loadIBMIcons();
 					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.defaultHeight;
 				}
 
-				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
-							ibmConfig.ibmSystemProperties.noFill;
+				//systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
+				//			ibmConfig.ibmSystemProperties.noFill;
+				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
 				//shapeHeight = shapeType.startsWith('group') ? 152 : 48;
@@ -362,13 +367,13 @@ const ibmIcons = loadIBMIcons();
 				if (shapeLayout === 'expandedStack')
 					systemProperties += ibmConfig.ibmSystemProperties.expandedStack;
 
-				if (!shapeFill)
-				{
-					if (shapeContainer)
-						systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
-					else
-						systemProperties += ibmConfig.ibmSystemProperties.noFill;
-				}
+				//if (!shapeFill)
+				//{
+				//	if (shapeContainer)
+				//		systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
+				//	else
+				//		systemProperties += ibmConfig.ibmSystemProperties.noFill;
+				//}
 
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
