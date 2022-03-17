@@ -69,7 +69,7 @@
 
         "fontProperty": "fontFamily=REGULAR;fontSize=14;",
         "badgeLabel": "<font style='font-size: 12px' face='REGULAR'>%Badge-Text%</font>",
-        "legendLabel": "<font style='font-size: 14px' face='REGULAR'>%Legend-Title%</font>",
+        "legendLabel": "<font style='font-size: 14px' face='SEMIBOLD'>%Legend-Title%</font>",
         "itemLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>",
         "shapeLabel": "<font style='font-size: 14px' face='SEMIBOLD'>%Primary-Label%</font><BR><font style='font-size: 14px' face='REGULAR'>%Secondary-Text%</font>",
         "unitLabel": "<font style='font-size: 12px' face='REGULAR'>%Primary-Label%</font><BR><font style='font-size: 12px' face='REGULAR'>%Secondary-Text%</font>"
@@ -233,6 +233,13 @@
 
 	"defaultFill": "fillColor=default;",
 	"noFill": "fillColor=none;",
+
+	"styleDashedOff": "ibmDashed=null;",
+	"styleDoubleOff": "ibmDouble=null;",
+	"styleStrikethroughOff": "ibmStrikethrough=null;",
+	"styleDashedOn": "ibmDouble=null;ibmStrikethrough=null;",
+	"styleDoubleOn": "ibmDashed=null;ibmStrikethrough=null;",
+	"styleStrikethroughOn": "ibmDashed=null;ibmDouble=null;",
 
 	"container": "container=1;collapsible=0;expand=0;recursiveResize=0;",
 	"containerNull": "container=null;collapsible=null;expand=null;recursiveResize=null;",

@@ -423,7 +423,7 @@ const ibmIcons = loadIBMIcons();
 		if (shapeType.startsWith('legend')) {
 			let label = ibmConfig.ibmFonts.legendLabel;
 			let font = ibmConfig.ibmFonts[ibmLanguage];
-			label = label.replace(/REGULAR/g, font.regular);
+			label = label.replace(/SEMIBOLD/g, font.semibold);
 
 			bg.setAttribute('label', label);
 			bg.setAttribute('Legend-Title', text);

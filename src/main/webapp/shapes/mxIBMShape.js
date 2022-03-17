@@ -100,6 +100,9 @@ mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 
 	lineColor = lineColor.toUpperCase();
 	let name = ibmConfig.colorNames[lineColor.substring(1)];
+	if (!name) {
+		return name;
+	}
 	let segments = name.split(' ');
 
 	for (var index = 0; index < segments.length; index++)
@@ -289,7 +292,7 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 		//properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
 		//		ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
-				ibmConfig.ibmSystemProperties.containerNull;
+				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 	else if (shapeLayout === "expanded")
 	{
 		if (shapeType === 'target')
@@ -309,25 +312,26 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 			//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
 			//			ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
-						ibmConfig.ibmSystemProperties.expandedStackNull;
+						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 	}
 	else if (shapeLayout === "expandedStack")
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
 		//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
 		//		ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
-				ibmConfig.ibmSystemProperties.container;
+				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 	else if (shapeLayout.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
 		//properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
 		//		ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
-				ibmConfig.ibmSystemProperties.expandedStackNull;
+				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 	else
 		// Remove expanded stack properties, remove container properties, remove fill.
 		//properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
 		//		ibmConfig.ibmSystemProperties.defaultFill;
-		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull;
+		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull +
+				ibmConfig.ibmSystemProperties.noFill;
 
 	// Convert properties to a style dictionary.
 	
@@ -360,6 +364,112 @@ mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout,
 
 	return style;
 };
+
+mxIBMShapeBase.prototype.getCellStylesDashed = function(styleDashed)
+{
+	let properties = '';
+	let styles = {};
+
+	properties = (styleDashed == 1) ? ibmConfig.ibmSystemProperties.styleDashedOn : ibmConfig.ibmSystemProperties.styleDashedOff;
+
+	// Convert properties to a style dictionary.
+	
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+mxIBMShapeBase.prototype.getCellStylesDouble = function(styleDouble)
+{
+	let properties = '';
+	let styles = {};
+
+	properties = (styleDouble == 1) ? ibmConfig.ibmSystemProperties.styleDoubleOn : ibmConfig.ibmSystemProperties.styleDoubleOff;
+
+	// Convert properties to a style dictionary.
+	
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+mxIBMShapeBase.prototype.getCellStylesStrikethrough = function(styleStrikethrough)
+{
+	let properties = '';
+	let styles = {};
+
+	properties = (styleStrikethrough == 1) ? ibmConfig.ibmSystemProperties.styleStrikethroughOn : ibmConfig.ibmSystemProperties.styleStrikethroughOff;
+
+	// Convert properties to a style dictionary.
+	
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+
+mxIBMShapeBase.prototype.setCellStyleDashed = function(style, styleDashed)
+{
+	let styles = mxIBMShapeBase.prototype.getCellStylesDashed(styleDashed);
+
+	for (let key in styles) 
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+};
+
+mxIBMShapeBase.prototype.setCellStyleDouble = function(style, styleDouble)
+{
+	let styles = mxIBMShapeBase.prototype.getCellStylesDouble(styleDouble);
+
+	for (let key in styles) 
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+}
+
+mxIBMShapeBase.prototype.setCellStyleStrikethrough = function(style, styleStrikethrough)
+{
+	let styles = mxIBMShapeBase.prototype.getCellStylesStrikethrough(styleStrikethrough);
+
+	for (let key in styles) 
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+}
 
 // Return switch icon if switching between logical to prescribed or prescribed to logical.
 mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
@@ -728,7 +838,42 @@ mxIBMShapeBase.prototype.handleEvents = function()
 						const hideIcon = valueStatus(style, mxIBMShapeBase.prototype.cst.HIDE_ICON);
 
 						const shapeLayout = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT);
-						
+
+						const shapeStyleDashed = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DASHED);
+						const shapeStyleDouble = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE);
+						const shapeStyleStrikethrough = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH);
+
+						var shapeStyleChanged = shapeStyleDashed.isChanged || shapeStyleDouble.isChanged || shapeStyleStrikethrough.isChanged;
+
+						var styleNewStyle;
+
+						if (shapeStyleDashed.isChanged)
+						{
+							styleNewStyle = style.current;
+							var updatedStyle = mxIBMShapeBase.prototype.getStyleDashed(styleNewStyle, shapeStyleDashed.current);
+							styleNewStyle = updatedStyle.style;
+							shapeStyleDashed.current = updatedStyle.shapeStyleDashed;
+							shapeStyleChanged = style.current !== styleNewStyle;
+						}
+
+						if (shapeStyleDouble.isChanged)
+						{
+							styleNewStyle = style.current;
+							var updatedStyle = mxIBMShapeBase.prototype.getStyleDouble(styleNewStyle, shapeStyleDouble.current);
+							styleNewStyle = updatedStyle.style;
+							shapeStyleDouble.current = updatedStyle.shapeStyleDouble;
+							shapeStyleChanged = style.current !== styleNewStyle;
+						}
+
+						if (shapeStyleStrikethrough.isChanged)
+						{
+							styleNewStyle = style.current;
+							var updatedStyle = mxIBMShapeBase.prototype.getStyleStrikethrough(styleNewStyle, shapeStyleStrikethrough.current);
+							styleNewStyle = updatedStyle.style;
+							shapeStyleStrikethrough.current = updatedStyle.shapeStyleStrikethrough;
+							shapeStyleChanged = style.current !== styleNewStyle;
+						}
+
 						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || iconImage;
 
 						if (needApplyStyle)
@@ -760,7 +905,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							needApplyGeo = geoCurrent.width != newRect.width || geoCurrent.height != newRect.height;
 						}
 	
-						if (needApplyStyle || needApplyGeo)
+						if (needApplyStyle || needApplyGeo || shapeStyleChanged)
 						{
 							this.state.view.graph.model.beginUpdate();
 							try
@@ -768,6 +913,11 @@ mxIBMShapeBase.prototype.handleEvents = function()
 								if (needApplyStyle)
 								{
 									this.state.view.graph.model.setStyle(this.state.cell, styleNew);
+								}
+									
+								if (shapeStyleChanged)
+								{
+									this.state.view.graph.model.setStyle(this.state.cell, styleNewStyle);
 								}
 									
 								if (needApplyGeo)
@@ -1404,6 +1554,27 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, layo
 		style = mxIBMShapeBase.prototype.setCellStyles(style, shapeType, shapeLayout, hideIcon);
 
 	return {style, shapeLayout};
+}
+
+mxIBMShapeBase.prototype.getStyleDashed = function(style, styleDashed)
+{
+	style = mxIBMShapeBase.prototype.setCellStyleDashed(style, styleDashed);
+
+	return {style, styleDashed};
+}
+
+mxIBMShapeBase.prototype.getStyleDouble = function(style, styleDouble)
+{
+	style = mxIBMShapeBase.prototype.setCellStyleDouble(style, styleDouble);
+
+	return {style, styleDouble};
+}
+
+mxIBMShapeBase.prototype.getStyleStrikethrough = function(style, styleStrikethrough)
+{
+	style = mxIBMShapeBase.prototype.setCellStyleStrikethrough(style, styleStrikethrough);
+
+	return {style, styleStrikethrough};
 }
 
 mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, shapeLayout)
