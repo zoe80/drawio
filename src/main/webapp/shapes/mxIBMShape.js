@@ -356,6 +356,7 @@ mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout,
 	return style;
 };
 
+/*
 mxIBMShapeBase.prototype.getCellStylesDashed = function(styleDashed)
 {
 	let properties = '';
@@ -430,8 +431,55 @@ mxIBMShapeBase.prototype.getCellStylesStrikethrough = function(styleStrikethroug
 
 	return styles;
 }
+*/
 
+// Ensure only one of dashed, double, or strikethrough is on at time, for example if user previously 
+// selected dashed and later selects double then dashed is auto-deselected.
+mxIBMShapeBase.prototype.getShapeStyles = function(styleDashed, styleDouble, styleStrikethrough)
+{
+	let properties = '';
+	let styles = {};
 
+	// Set properties to the desired change for dashed, double, or strikethrough. 
+	
+	if (styleDashed.isChanged)
+		properties = (styleDashed.current == 1) ? ibmConfig.ibmSystemProperties.styleDashedOn : ibmConfig.ibmSystemProperties.styleDashedOff;
+
+	if (styleDouble.isChanged)
+		properties = (styleDouble.current == 1) ? ibmConfig.ibmSystemProperties.styleDoubleOn : ibmConfig.ibmSystemProperties.styleDoubleOff;
+
+	if (styleStrikethrough.isChanged)
+		properties = (styleStrikethrough.current == 1) ? ibmConfig.ibmSystemProperties.styleStrikethroughOn : ibmConfig.ibmSystemProperties.styleStrikethroughOff;
+
+	// Convert properties to a style dictionary.
+	
+	properties = properties.slice(0, -1); // Remove trailing semicolon.
+
+	let array = properties.split(';');
+
+	for (var index = 0; index < array.length; index++)
+	{
+		element = array[index].split('=');
+		if (element[1] === 'null')
+			styles[element[0]] = null;
+		else	
+			styles[element[0]] = element[1];
+	}
+
+	return styles;
+}
+
+mxIBMShapeBase.prototype.setShapeStyle = function(style, styleDashed, styleDouble, styleStrikethrough)
+{
+	let styles = mxIBMShapeBase.prototype.getShapeStyles(styleDashed, styleDouble, styleStrikethrough);
+
+	for (let key in styles) 
+		style = mxUtils.setStyle(style, key, styles[key]);
+
+	return style;
+}
+
+/*
 mxIBMShapeBase.prototype.setCellStyleDashed = function(style, styleDashed)
 {
 	let styles = mxIBMShapeBase.prototype.getCellStylesDashed(styleDashed);
@@ -461,6 +509,7 @@ mxIBMShapeBase.prototype.setCellStyleStrikethrough = function(style, styleStrike
 
 	return style;
 }
+*/
 
 // Return switch icon if switching between logical to prescribed or prescribed to logical.
 mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
@@ -830,14 +879,26 @@ mxIBMShapeBase.prototype.handleEvents = function()
 
 						const shapeLayout = valueStatus(style, mxIBMShapeBase.prototype.cst.SHAPE_LAYOUT);
 
-						const shapeStyleDashed = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DASHED);
-						const shapeStyleDouble = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE);
-						const shapeStyleStrikethrough = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH);
+						const styleDashed = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DASHED);
+						const styleDouble = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_DOUBLE);
+						const styleStrikethrough = valueStatus(style, mxIBMShapeBase.prototype.cst.STYLE_STRIKETHROUGH);
 
-						var shapeStyleChanged = shapeStyleDashed.isChanged || shapeStyleDouble.isChanged || shapeStyleStrikethrough.isChanged;
+						var styleChanged = styleDashed.isChanged || styleDouble.isChanged || styleStrikethrough.isChanged;
 
 						var styleNewStyle;
 
+						if (styleChanged)
+						{
+							styleNewStyle = style.current;
+							var updatedStyle = mxIBMShapeBase.prototype.getShapeStyle(styleNewStyle, styleDashed, styleDouble, styleStrikethrough);
+							styleNewStyle = updatedStyle.style;
+							styleDashed.current = updatedStyle.styleDashed;
+							styleDouble.current = updatedStyle.styleDouble;
+							styleStrikethrough.current = updatedStyle.styleStrikethrough;
+							styleChanged = style.current !== styleNewStyle;
+						}
+
+						/*
 						if (shapeStyleDashed.isChanged)
 						{
 							styleNewStyle = style.current;
@@ -864,6 +925,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							shapeStyleStrikethrough.current = updatedStyle.shapeStyleStrikethrough;
 							shapeStyleChanged = style.current !== styleNewStyle;
 						}
+						*/
 
 						var needApplyStyle = shapeType.isChanged || shapeLayout.isChanged || hideIcon.isChanged || iconImage;
 
@@ -896,7 +958,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 							needApplyGeo = geoCurrent.width != newRect.width || geoCurrent.height != newRect.height;
 						}
 	
-						if (needApplyStyle || needApplyGeo || shapeStyleChanged)
+						if (needApplyStyle || needApplyGeo || styleChanged)
 						{
 							this.state.view.graph.model.beginUpdate();
 							try
@@ -906,7 +968,7 @@ mxIBMShapeBase.prototype.handleEvents = function()
 									this.state.view.graph.model.setStyle(this.state.cell, styleNew);
 								}
 									
-								if (shapeStyleChanged)
+								if (styleChanged)
 								{
 									this.state.view.graph.model.setStyle(this.state.cell, styleNewStyle);
 								}
@@ -1547,6 +1609,14 @@ mxIBMShapeBase.prototype.getStyle = function(style, shapeType, shapeLayout, layo
 	return {style, shapeLayout};
 }
 
+mxIBMShapeBase.prototype.getShapeStyle = function(style, styleDashed, styleDouble, styleStrikethrough)
+{
+	style = mxIBMShapeBase.prototype.setShapeStyle(style, styleDashed, styleDouble, styleStrikethrough);
+
+	return {style, styleDashed, styleDouble, styleStrikethrough};
+}
+
+/*
 mxIBMShapeBase.prototype.getStyleDashed = function(style, styleDashed)
 {
 	style = mxIBMShapeBase.prototype.setCellStyleDashed(style, styleDashed);
@@ -1567,6 +1637,7 @@ mxIBMShapeBase.prototype.getStyleStrikethrough = function(style, styleStrikethro
 
 	return {style, styleStrikethrough};
 }
+*/
 
 mxIBMShapeBase.prototype.getRectangle = function(usingMinSize, rect, shapeType, shapeLayout)
 {

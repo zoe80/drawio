@@ -43,6 +43,17 @@ const ibmIcons = loadIBMIcons();
 		this.GenerateIBMShapePalette([JSON.parse(jsonText)]);
 	}
 
+	Sidebar.prototype.addIBMPalette = function() 
+	{
+		this.createIBMPalette('ibm', 'IBMIcons.json'); 
+		this.createIBMPalette('ibm', 'IBMShapes.json');
+		this.createIBMPalette('ibm', 'IBMCloud.json'); 
+		this.createIBMPalette('ibm', 'IBMCore.json'); 
+		this.createIBMPalette('ibm', 'IBMHelpers.json');
+		this.createIBMPalette('ibm', 'IBMStarters.json'); 
+	}
+
+	/*
 	Sidebar.prototype.addIBMBasePalette = function() 
 	{ 
 		this.createIBMPalette('ibmbase', 'IBMIcons.json'); 
@@ -60,6 +71,7 @@ const ibmIcons = loadIBMIcons();
 		this.createIBMPalette('ibmsets', 'IBMHelpers.json');
 		this.createIBMPalette('ibmsets', 'IBMStarters.json'); 
 	}
+	*/
 
 	Sidebar.prototype.addIBMShapeEditorExtensions = function()
 	{
