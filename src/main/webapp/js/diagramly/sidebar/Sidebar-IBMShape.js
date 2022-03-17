@@ -53,26 +53,6 @@ const ibmIcons = loadIBMIcons();
 		this.createIBMPalette('ibm', 'IBMStarters.json'); 
 	}
 
-	/*
-	Sidebar.prototype.addIBMBasePalette = function() 
-	{ 
-		this.createIBMPalette('ibmbase', 'IBMIcons.json'); 
-		this.createIBMPalette('ibmbase', 'IBMShapes.json');
-	}
-
-	Sidebar.prototype.addIBMCloudPalette = function() 
-	{ 
-		this.createIBMPalette('ibmcloud', 'IBMCloud.json'); 
-		this.createIBMPalette('ibmcloud', 'IBMCore.json'); 
-	}
-
-	Sidebar.prototype.addIBMSetsPalette = function() 
-	{ 
-		this.createIBMPalette('ibmsets', 'IBMHelpers.json');
-		this.createIBMPalette('ibmsets', 'IBMStarters.json'); 
-	}
-	*/
-
 	Sidebar.prototype.addIBMShapeEditorExtensions = function()
 	{
 		if (Editor.config != null && Editor.config[ibmConfig.ibmBaseConstants.SHAPE])
@@ -284,7 +264,6 @@ const ibmIcons = loadIBMIcons();
 		let font = ibmConfig.ibmFonts[ibmLanguage];
 		fontProperty = fontProperty.replace(/REGULAR/g, font.regular);
 		fontProperty = fontProperty.replace(/SEMIBOLD/g, font.semibold);
-		//coreProperties += ibmConfig.ibmSystemProperties.basic + ibmConfig.ibmFontProperties[ibmLanguage + 'Primary'];
 		coreProperties += ibmConfig.ibmSystemProperties.basic + fontProperty;
 
 		if (shapeWeight)
@@ -354,8 +333,6 @@ const ibmIcons = loadIBMIcons();
 					shapeHeight = ibmConfig.ibmShapeSizes.collapsed.defaultHeight;
 				}
 
-				//systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel +
-				//			ibmConfig.ibmSystemProperties.noFill;
 				systemProperties += ibmConfig.ibmSystemProperties.collapsedLabel;
 			}
 			else if (shapeLayout.startsWith('expanded')) {
@@ -379,19 +356,11 @@ const ibmIcons = loadIBMIcons();
 				if (shapeLayout === 'expandedStack')
 					systemProperties += ibmConfig.ibmSystemProperties.expandedStack;
 
-				//if (!shapeFill)
-				//{
-				//	if (shapeContainer)
-				//		systemProperties += ibmConfig.ibmSystemProperties.defaultFill;
-				//	else
-				//		systemProperties += ibmConfig.ibmSystemProperties.noFill;
-				//}
-
 				if (shapeContainer)
 					systemProperties += ibmConfig.ibmSystemProperties.container;
 
 			}
-			else { //if (shapeLayout.startsWith('item')) {
+			else { //if (shapeLayout.startsWith('item'))
 				//shapeHeight = 16;
 				//shapeWidth = 240;
 				if (shapeLayout === 'itemBadge') {
