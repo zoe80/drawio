@@ -60,6 +60,7 @@ mxIBMShapeBase.prototype.rgb2hex = function(color)
 // Normalize line color.
 mxIBMShapeBase.prototype.normalizeLineColor = function(lineColor)
 {
+	return lineColor;
 }
 
 // Normalize fill color and line color.
@@ -118,12 +119,14 @@ mxIBMShapeBase.prototype.normalizeFontColor = function(fontColor, lineColor)
 // Normalize icon color to be visible if lineColor is too dark.
 mxIBMShapeBase.prototype.normalizeIconColor = function(iconColor, lineColor)
 {
+	// Same as font logic initially.
 	return mxIBMShapeBase.prototype.normalizeFontColor(iconColor, lineColor);
 }
 
 // Normalize style color to be visible if lineColor is too dark.
 mxIBMShapeBase.prototype.normalizeStyleColor = function(styleColor, lineColor)
 {
+	// Same as font logic initially.
 	return mxIBMShapeBase.prototype.normalizeFontColor(styleColor, lineColor);
 }
 
@@ -460,6 +463,8 @@ mxIBMShapeBase.prototype.setColorStyle = function(style, lineColor, fillColor, f
 // as defined in IBMIcons.json.
 mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, currentType)
 {
+	return previousIcon;
+	/* In progress.
 	if (previousType.slice(-1) === 'l' && currentType.slice(-1) === 'p')
 		// Lookup logical icon in ibmIcons and switch to prescribed icon if available.
 		return("undefined");
@@ -468,6 +473,7 @@ mxIBMShapeBase.prototype.switchIcon = function(previousIcon, previousType, curre
 		return("undefined");
 	else
 		return previousIcon;
+	*/
 }
 
 mxIBMShapeBase.prototype.getDimensions = function(shape, shapeType, shapeLayout, width, height)
