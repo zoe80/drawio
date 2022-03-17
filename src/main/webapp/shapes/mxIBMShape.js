@@ -288,48 +288,37 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 	// Get shape-specific properties.
 	
 	if (shapeLayout === "collapsed")
-		// Add collapsed text properties, remove expanded stack properties, remove container properties, remove fill.
-		//properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
-		//		ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
+		// Add collapsed label properties, remove expanded stack properties, remove container properties, remove fill.
 		properties += ibmConfig.ibmSystemProperties.collapsedLabel + ibmConfig.ibmSystemProperties.expandedStackNull + 
 				ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.noFill;
 	else if (shapeLayout === "expanded")
 	{
 		if (shapeType === 'target')
 		{
-			// Add expanded label properties, remove container properties, remove expanded stack properties, add default fill.
+			// Add expanded label properties, remove container properties, remove expanded stack properties, remove fill.
 			if (hideIcon) 
 				properties += ibmConfig.ibmSystemProperties.expandedTargetLabelNoIcon; 
 			else
 				properties += ibmConfig.ibmSystemProperties.expandedTargetLabel;
 
-			//properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull + 
-			//		ibmConfig.ibmSystemProperties.defaultFill;
-			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull;
+			properties += ibmConfig.ibmSystemProperties.containerNull + ibmConfig.ibmSystemProperties.expandedStackNull +
+					ibmConfig.ibmSystemProperties.noFill;
 		}
 		else
 			// Add expanded label properties, add container properties, remove expanded stack properties, add default fill.
-			//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
-			//			ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 			properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.container + 
 						ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.defaultFill;
 	}
 	else if (shapeLayout === "expandedStack")
 		// Add expanded label properties, expanded stack properties, add container properties, add default fill.
-		//properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
-		//		ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 		properties += ibmConfig.ibmSystemProperties.expandedLabel + ibmConfig.ibmSystemProperties.expandedStack + 
 				ibmConfig.ibmSystemProperties.container + ibmConfig.ibmSystemProperties.defaultFill;
 	else if (shapeLayout.startsWith('item'))
 		// Add item label properties, remove container properties, remove expanded stack properties, remove fill.
-		//properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
-		//		ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 		properties += ibmConfig.ibmSystemProperties.itemLabel + ibmConfig.ibmSystemProperties.containerNull + 
 				ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.noFill;
 	else
 		// Remove expanded stack properties, remove container properties, remove fill.
-		//properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull + 
-		//		ibmConfig.ibmSystemProperties.defaultFill;
 		properties += ibmConfig.ibmSystemProperties.expandedStackNull + ibmConfig.ibmSystemProperties.containerNull +
 				ibmConfig.ibmSystemProperties.noFill;
 
@@ -351,10 +340,12 @@ mxIBMShapeBase.prototype.getCellStyles = function(shapeType, shapeLayout, hideIc
 	return styles;
 }
 
-// Get and set cell styles for events (layout changes, color changes TBD, etc).
+// Get and set cell styles for events (layout changes, color changes TBD, rotation changes TBD, etc).
+// Color, rotation, etc (TBD) in events are to help users follow our design spec.
 // data TBD = {shapeType, shapeLayout,
 //             lineColor, fillColor, fontColor, badgeColor,
-//             layoutChanged, colorChanged, hideIcon}`
+//             layoutChanged, lineChanged, fillChanged, fontChanged, badgeChanged,
+//             rotationChanged, hideIcon}
 mxIBMShapeBase.prototype.setCellStyles = function(style, shapeType, shapeLayout, hideIcon)
 {
 	let styles = mxIBMShapeBase.prototype.getCellStyles(shapeType, shapeLayout, hideIcon);
