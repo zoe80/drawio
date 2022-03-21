@@ -1119,6 +1119,9 @@ mxIBMShapeBase.prototype.paintShape = function(c)
 		c.close();
 		c.fill();
 	}
+	else if (['actor', 'target'].includes(pop.shapeType)) {
+		// NA
+	}
 	else
 	{
 		c.rect(0, 0, pop.shapeWidth, pop.labelHeight);
